@@ -16,6 +16,7 @@ class Potato extends React.Component {
 		//this.setState({output: JSON.stringify(result)});
 	});
 
+	// on main net!
 	var address = '0xc50ba8ee9fc19912216731b9170d5bdfc28067f6';
 
 	this.web3.eth.getStorageAt(address, 0, (error, result) => {
