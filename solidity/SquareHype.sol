@@ -1,6 +1,6 @@
 pragma solidity ^0.4.0;
 
-contract PotatoStorage {
+contract SquareHype {
     string storedPotato;
 
     function setPotato(string x) public {
