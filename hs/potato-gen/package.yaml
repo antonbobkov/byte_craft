@@ -1,0 +1,58 @@
+name:                potato-gen
+version:             0.1.0.0
+github:              "githubuser/potato-gen"
+license:             BSD3
+author:              "Author name here"
+maintainer:          "example@example.com"
+copyright:           "2018 Author name here"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+- potato.json
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/githubuser/potato-gen#readme>
+
+dependencies:
+- base
+- repa
+- JuicyPixels
+- JuicyPixels-repa
+- gloss
+- web3
+- data-default
+- basement
+- http-client-tls
+- bytestring
+
+library:
+  source-dirs: src
+
+executables:
+  potato-gen-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - potato-gen
+
+tests:
+  potato-gen-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - potato-gen
