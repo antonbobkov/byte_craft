@@ -13,12 +13,12 @@ import Debug.Trace
 import Lib
 
 main = do
-    web3 <- query
+    orig' <- readImageRGBA "1024.png"
+    let orig = imgData (either error id orig')
+    putStrLn (show $ R.extent orig)
+    arr <- query orig
     let
-        wi = either (\e -> trace (show e) undefined) id web3
-        arr :: R.Array R.U R.DIM3 Word8
-        arr = R.fromList (Z:.bwidth:.bheight:.3) wi
-        wimg = Img $ R.delay arr
+        wimg = Img arr
         mkPic img = let (Z:.c:.r:.z) = extent (imgData img)
              in bitmapOfByteString r c (BitmapFormat TopToBottom PxRGBA) (toByteString img) True
         glossImg =  (mkPic $ wimg)

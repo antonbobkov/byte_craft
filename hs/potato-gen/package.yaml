@@ -10,6 +10,7 @@ extra-source-files:
 - README.md
 - ChangeLog.md
 - potato.json
+- 1024.png
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -31,6 +32,7 @@ dependencies:
 - basement
 - http-client-tls
 - bytestring
+- cereal
 
 library:
   source-dirs: src
