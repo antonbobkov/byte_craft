@@ -24,6 +24,11 @@ contract SquareHype {
     return (p.rgb, p.owner, p.value);
   }
 
+  function getColor(uint8 x, uint8 y) external view returns(uint8[3]){
+    Pixel storage p = screen[getIndex(x,y)];
+    return p.rgb;
+  }
+  
   modifier hasAccess(uint8 x, uint8 y) {
     Pixel storage p = screen[getIndex(x,y)];
     require(p.owner == 0 || msg.sender == p.owner, "access denied");
