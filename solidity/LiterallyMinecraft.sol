@@ -114,6 +114,26 @@ contract AFiller
         emit bts(clrs[i]);
     }
     
-    lm.setColors(0, 0, clrs);
+    lm.setColors(1, 0, clrs);
   }
+}
+
+contract CFiller{
+  function f(bytes32) public{}
+}
+
+
+contract BFiller
+{
+  event bts(bytes32); 
+  uint public constant chunk_height = 32;
+  
+  constructor(address a) public{
+    LiterallyMinecraft lm = LiterallyMinecraft(a);
+
+    bytes32[chunk_height] memory clrs;
+
+    lm.setColors(2, 2, clrs);
+  }
+  
 }
