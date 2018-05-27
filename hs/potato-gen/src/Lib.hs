@@ -39,6 +39,7 @@ import Data.Array.Repa as R
 import Data.Array.Repa.Eval as R
 
 import Debug.Trace
+import Control.Exception.Base
 
 [abiFrom|potato.json|]
 
@@ -58,8 +59,6 @@ bwidth :: Int
 bwidth = 32
 bheight :: Int
 bheight = 32
-bwidth' = fromInteger . toInteger $ bwidth
-bheight' = fromInteger . toInteger $ bheight
 
 cwidth :: Int
 cwidth = 32
@@ -70,24 +69,33 @@ myCall = def { callTo = Just "0x7DBBcE351ec9334fd378A6C5Ba2ac8Dc27ea4f5C" }
 
 fst3 (x,_,_) = x
 
-web3test :: Web3 [B.ByteString]
+-- [(x,y), color, owner, price]
+web3test :: Web3 [((Int,Int), B.ByteString, Address, Int)]
 web3test = do
-    xs <- forM [(x,y) | y <- [0..bheight'-1], x <- [0..bwidth'-1]]
-        (\(x,y) -> liftIO (putStrLn $ "fetching " Prelude.++ show x Prelude.++ " " Prelude.++ show y) >> getChunk myCall x y)
-    return $ Prelude.map (runPut . abiPut . fst3) xs
+    forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] $ \pt -> do
+        (color, addr, val) <- queryBlock pt
+        return (pt, color, addr, val)
 
+queryBlock :: (Int, Int) -> Web3 (B.ByteString, Address,  Int)
+queryBlock (x,y) = do
+    liftIO (putStrLn $ "fetching " Prelude.++ show x Prelude.++ " " Prelude.++ show y)
+    (color, addr, val) <- getChunk myCall (fromIntegral x) (fromIntegral y)
+    return (runPut (abiPut color), addr, fromIntegral val)
 
 toColor :: Float -> Word8 -> Word8
-toColor res w = round $ ((fromIntegral w) / res) * 256
+toColor res w = round $ (fromIntegral w / res) * 256
 
-maketfunc :: [B.ByteString] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
+-- | make traversal function to update image with updated data
+maketfunc :: [((Int,Int),B.ByteString, Address, Int)] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
 maketfunc chunks _ (Z:.x:.y:.c) = final where
     xc = x `div` cwidth
     yc = y `div` cheight
     xr = x `mod` cwidth
     yr = y `mod` cheight
-    bs = chunks !! (yc*bwidth + xc)
-    word = B.index bs (yr*cwidth + xr)
+    ((x,y),bs,_,_) = chunks !! (yc*bwidth + xc)
+    -- TODO this needs to find (xc,yc) in the list and use that value
+    -- make sure the indexing is right
+    word = assert (x == xc && y == yc) $ B.index bs (yr*cwidth + xr)
     final = if
         | c == 0 -> toColor 8 $ shiftR (0xE0 `xor` word) 5
         | c == 1 -> toColor 8 $ shiftR (0x1C `xor` word) 2
@@ -98,7 +106,7 @@ maketfunc chunks _ (Z:.x:.y:.c) = final where
 
 updateImage ::
     (R.Source r Word8) =>
-    [B.ByteString]
+    [((Int,Int), B.ByteString, Address, Int)]
     -> R.Array r R.DIM3 Word8 -- ^ input array
     -> R.Array R.D R.DIM3 Word8
 updateImage chunks img = R.traverse img id (maketfunc chunks)
