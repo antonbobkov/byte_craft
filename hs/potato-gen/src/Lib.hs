@@ -8,11 +8,10 @@
 {-# LANGUAGE ScopedTypeVariables           #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE MultiWayIf           #-}
-
-
-
+{-# LANGUAGE DeriveAnyClass #-}
 
 module Lib (
+makeEntries,
 query,
 bwidth,
 bheight
@@ -33,13 +32,18 @@ import Data.Word
 import Data.Bits
 import Data.Serialize.Put
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
 
-
+import Data.List (find)
+import Data.Maybe (fromMaybe)
 import Data.Array.Repa as R
 import Data.Array.Repa.Eval as R
 
 import Debug.Trace
 import Control.Exception.Base
+
+import GHC.Generics
+import Data.Aeson
 
 [abiFrom|potato.json|]
 
@@ -53,6 +57,17 @@ Network.Ethereum.Web3.Types.Call
 
 -- myprov = "https://api.myetherapi.com/eth"
 myprov = "https://ropsten.infura.io/"
+
+
+data Entry = Entry {
+  pos_x :: Int
+  , pos_y :: Int
+  , address :: String
+  , cost :: Int
+} deriving (Generic, ToJSON, FromJSON, Show)
+
+
+
 
 -- global width/height
 bwidth :: Int
@@ -72,36 +87,37 @@ fst3 (x,_,_) = x
 -- [(x,y), color, owner, price]
 web3test :: Web3 [((Int,Int), B.ByteString, Address, Int)]
 web3test = do
-    forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] $ \pt -> do
-        (color, addr, val) <- queryBlock pt
-        return (pt, color, addr, val)
+    forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] queryBlock
 
-queryBlock :: (Int, Int) -> Web3 (B.ByteString, Address,  Int)
+queryBlock :: (Int, Int) -> Web3 ((Int,Int), B.ByteString, Address,  Int)
 queryBlock (x,y) = do
     liftIO (putStrLn $ "fetching " Prelude.++ show x Prelude.++ " " Prelude.++ show y)
     (color, addr, val) <- getChunk myCall (fromIntegral x) (fromIntegral y)
-    return (runPut (abiPut color), addr, fromIntegral val)
+    return ((x,y), runPut (abiPut color), addr, fromIntegral val)
 
 toColor :: Float -> Word8 -> Word8
 toColor res w = round $ (fromIntegral w / res) * 256
 
 -- | make traversal function to update image with updated data
 maketfunc :: [((Int,Int),B.ByteString, Address, Int)] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
-maketfunc chunks _ (Z:.x:.y:.c) = final where
+maketfunc chunks f s@(Z:.x:.y:.c) = final where
     xc = x `div` cwidth
     yc = y `div` cheight
     xr = x `mod` cwidth
     yr = y `mod` cheight
-    ((x,y),bs,_,_) = chunks !! (yc*bwidth + xc)
-    -- TODO this needs to find (xc,yc) in the list and use that value
-    -- make sure the indexing is right
-    word = assert (x == xc && y == yc) $ B.index bs (yr*cwidth + xr)
-    final = if
-        | c == 0 -> toColor 8 $ shiftR (0xE0 `xor` word) 5
-        | c == 1 -> toColor 8 $ shiftR (0x1C `xor` word) 2
-        | c == 2 -> toColor 4 $ shiftR (0x03 `xor` word) 0
-        | c == 3 -> 255
+    found = do
+        (_,bs,_,_) <- find (\((x,y),_,_,_) -> xc == x && yc == y) chunks
+        let word = B.index bs (yr*cwidth + xr)
+        return $ if
+            | c == 0 -> toColor 8 $ shiftR (0xE0 `xor` word) 5
+            | c == 1 -> toColor 8 $ shiftR (0x1C `xor` word) 2
+            | c == 2 -> toColor 4 $ shiftR (0x03 `xor` word) 0
+            | c == 3 -> 255
+    final = fromMaybe (f s) found
 
+
+makeEntries :: [((Int,Int),B.ByteString, Address, Int)] -> [Entry]
+makeEntries = Prelude.map (\((x,y),_,addr,cost) -> Entry x y (show addr) cost)
 
 
 updateImage ::
@@ -114,8 +130,13 @@ updateImage chunks img = R.traverse img id (maketfunc chunks)
 query :: (R.Source r Word8) => R.Array r R.DIM3 Word8 -> IO (R.Array R.D R.DIM3 Word8)
 query img = do
     manager <- newTlsManager
-    chunks' <- runWeb3With manager (HttpProvider myprov) web3test
-    let chunks = either (\e -> trace (show e) undefined) id chunks'
+    --chunks' <- runWeb3With manager (HttpProvider myprov) web3test
+    block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
+    let
+        --chunks = either (\e -> trace (show e) undefined) id chunks'
+        chunks = [either (\e -> trace (show e) undefined) id block']
+    print $ makeEntries chunks
+    BL.writeFile "values.json" . encode . makeEntries $ chunks
     return $ updateImage chunks img
 
 

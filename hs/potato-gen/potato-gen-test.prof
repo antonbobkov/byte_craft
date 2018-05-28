@@ -1,0 +1,32 @@
+	Sun May 27 09:24 2018 Time and Allocation Profiling Report  (Final)
+
+	   potato-gen-test +RTS -N -p -RTS
+
+	total time  =        0.00 secs   (0 ticks @ 1000 us, 1 processor)
+	total alloc =      75,424 bytes  (excludes profiling overheads)
+
+COST CENTRE MODULE           SRC                  %time %alloc
+
+MAIN        MAIN             <built-in>             0.0   31.3
+CAF         GHC.Event.Thread <entire-module>        0.0    1.6
+CAF         GHC.IO.Handle.FD <entire-module>        0.0   46.0
+CAF         GHC.IO.Encoding  <entire-module>        0.0    3.7
+CAF:main2   Main             <no location info>     0.0    2.9
+main        Main             test/Spec.hs:2:1-48    0.0   13.2
+
+
+                                                                          individual      inherited
+COST CENTRE  MODULE                SRC                 no.     entries  %time %alloc   %time %alloc
+
+MAIN         MAIN                  <built-in>          143          0    0.0   31.3     0.0  100.0
+ CAF         GHC.Conc.Signal       <entire-module>     236          0    0.0    0.8     0.0    0.8
+ CAF         GHC.IO.Encoding       <entire-module>     219          0    0.0    3.7     0.0    3.7
+ CAF         GHC.IO.Encoding.Iconv <entire-module>     217          0    0.0    0.3     0.0    0.3
+ CAF         GHC.IO.Handle.FD      <entire-module>     208          0    0.0   46.0     0.0   46.0
+ CAF         GHC.IO.Handle.Text    <entire-module>     206          0    0.0    0.1     0.0    0.1
+ CAF         GHC.Event.Poll        <entire-module>     160          0    0.0    0.1     0.0    0.1
+ CAF         GHC.Event.Thread      <entire-module>     159          0    0.0    1.6     0.0    1.6
+ CAF:main1   Main                  <no location info>  284          0    0.0    0.0     0.0    0.1
+  main       Main                  test/Spec.hs:2:1-48 286          1    0.0    0.1     0.0    0.1
+ CAF:main2   Main                  <no location info>  283          0    0.0    2.9     0.0    2.9
+ main        Main                  test/Spec.hs:2:1-48 287          0    0.0   13.2     0.0   13.2
