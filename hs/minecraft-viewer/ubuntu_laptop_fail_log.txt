@@ -1,3 +1,0 @@
-Downloading lts-11.10 build plan ...
-Downloaded lts-11.10 build plan.
-AesonException "Invalid flag name: \"bytestring--lt-0_10_4\""
