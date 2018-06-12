@@ -130,11 +130,11 @@ updateImage chunks img = R.traverse img id (maketfunc chunks)
 query :: (R.Source r Word8) => R.Array r R.DIM3 Word8 -> IO (R.Array R.D R.DIM3 Word8)
 query img = do
     manager <- newTlsManager
-    --chunks' <- runWeb3With manager (HttpProvider myprov) web3test
-    block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
+    chunks' <- runWeb3With manager (HttpProvider myprov) web3test
+    --block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
     let
-        --chunks = either (\e -> trace (show e) undefined) id chunks'
-        chunks = [either (\e -> trace (show e) undefined) id block']
+        chunks = either (\e -> trace (show e) undefined) id chunks'
+        --chunks = [either (\e -> trace (show e) undefined) id block']
     print $ makeEntries chunks
     BL.writeFile "values.json" . encode . makeEntries $ chunks
     return $ updateImage chunks img
