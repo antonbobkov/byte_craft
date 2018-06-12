@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html>
+  <link rel="stylesheet" type="text/css" href="css_mmsk.css">
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  
+  <script type="text/javascript" src="metamask.js"></script>
+  <script type="text/javascript" src="bmp_reader.js"></script>
+  <script type="text/javascript" src="bitshift.js"></script>
+  <script type="text/javascript" src="log.js"></script>
+  <script type="text/javascript" src="js_main.js"></script>
+
+  <body onload="GlobalOnLoad()">
+    <div id="messages"></div>
+    
+    <div hidden id="main">
+      <canvas id="canvas1" width="32" height="32">
+	Your browser does not support HTML5 Canvas.
+      </canvas>
+      
+      <p> Select a 32x32 pixels 24-bit BMP image:  <input type="file" id="input" /></p>
+      <div hidden id="send-div">
+	<p> Enter coordinates of the chunk to send the image to: </p>
+	<p> x: <input type="text" id="x" /></p>
+	<p> y: <input type="text" id="y" /></p>
+	<button id="send-btn">Send Transaction</button>
+      </div>
+    </div>
+    
+    <div id="errors"></div>
+  </body>
+
+</html>
+

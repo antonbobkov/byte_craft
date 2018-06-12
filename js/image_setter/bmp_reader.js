@@ -1,18 +1,39 @@
-var inputElement =  document.getElementById("input");
-inputElement.addEventListener("change",
-                              handleFiles, false);
+
+function BmpReaderOnLoad(){
+
+    var inputElement =  document.getElementById("input");
+    inputElement.addEventListener("change", handleFiles, false);    
+}
 
 function handleFiles(e) {
     var file = e.target.files[0];
     var reader = new FileReader();
-    reader.addEventListener("load", 
-                            processimage, false);
+    reader.addEventListener("load", processimage, false);
     reader.readAsArrayBuffer(file);
 }
 
 function processimage(e) {
     var buffer = e.target.result;
     var bitmap = getBMP(buffer);
+
+    errorLogClear();
+
+    var stop = false;
+    
+    if (bitmap.infoheader.biBitCount != 24){
+	stop = true;
+	errorLog("Bit count needs to be 24 bit. Selected image is " + bitmap.infoheader.biBitCount + " bit.");
+    }
+    if (bitmap.infoheader.biWidth != 32 || bitmap.infoheader.biHeight != 32){
+	stop = true;
+	errorLog("Image needs to be 32x32 pixels. Selected image is " + bitmap.infoheader.biWidth + "x" + bitmap.infoheader.biHeight + ".");
+    }
+
+    if (stop)
+	return;
+
+    $('#send-div').show();
+    
     convertToImageData(bitmap);
 }
 
@@ -58,15 +79,18 @@ function getBMP(buffer) {
     bitmap.stride = Math.floor(
 	(bitmap.infoheader.biBitCount *
 	 bitmap.infoheader.biWidth+31)/32)*4;
+    
     bitmap.pixels = 
         new Uint8Array(buffer, start);
     return bitmap;
 }
+var colorData = [];
 
 
 function convertToImageData(bitmap) {
     canvas = document.createElement("canvas");
     var ctx = canvas.getContext("2d");
+    
     var Width = bitmap.infoheader.biWidth;
     var Height = bitmap.infoheader.biHeight;
     var imageData = 
@@ -78,26 +102,35 @@ function convertToImageData(bitmap) {
     console.log(Width);
     console.log(Height);
 
-    var output = document.getElementById('output');     
-    output.innerHTML += '['
+    var output = document.getElementById('main');
+    colorData = [];
 
     for (var y = 0; y < Height; ++y) {
-	ln = '0x'
+	bt_line = '0x';
 	for (var x = 0; x < Width; ++x) {
 	    var index2 = x * 3 + stride * y;
-	    r = bmpdata[index2 + 2]
-	    g = bmpdata[index2 + 1]
-	    b = bmpdata[index2 + 0]
-	    bt = byte_letters(color_convert(r, g, b))
+	    var index1 = (x+Width*(Height-y-1))*4;
 	    
-	    console.log(r, g, b, bt);
+	    data[index1] = bmpdata[index2 + 2];
+	    data[index1 + 1] = bmpdata[index2 + 1];
+	    data[index1 + 2] = bmpdata[index2];
+	    data[index1 + 3] = 255;
+	    
+	    r = bmpdata[index2 + 2];
+	    g = bmpdata[index2 + 1];
+	    b = bmpdata[index2 + 0];
+	    bt = byte_letters(color_convert(r, g, b));
+	    
+	    // console.log(r, g, b, bt);
 
-	    ln += bt
+	    bt_line += bt;
 	}
-	console.log(r, g, b, ln)
-	output.innerHTML += '"' + ln + '"'
-	if (y != Height - 1)
-	    output.innerHTML += ', '
+	// console.log(r, g, b, ln)
+	colorData.push(bt_line);
     }
-    output.innerHTML += ']'
+    
+    canvas1 = document.getElementById('canvas1');
+    ctx1 = canvas1.getContext('2d');
+    
+    ctx1.putImageData(imageData, 0, 0);
 }

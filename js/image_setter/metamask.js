@@ -1,43 +1,54 @@
-window.addEventListener('load', function() {
-    // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+
+function NetworkName(netId){
+    switch (netId) {
+    case "1":
+	return 'Main network';
+    case "2":
+	return 'deprecated Morden test network';
+    case "3":
+	return 'Ropsten test network';
+    case "4":
+	return 'Rinkeby test network';
+    case "42":
+	return 'Kovan test network';
+    default:
+	return 'unknown network.';
+    }
+}
+
+function MetaMaskOnLoad() {
     if (typeof web3 !== 'undefined') {
-	// Use Mist/MetaMask's provider
+	
 	web3 = new Web3(web3.currentProvider);
-	console.log('success!')
+	
+	messageLog("MetaMask successfully detected.");
+	
 	
 	web3.version.getNetwork((err, netId) => {
-	    switch (netId) {
-	    case "1":
-		console.log('This is mainnet')
-		break
-	    case "2":
-		console.log('This is the deprecated Morden test network.')
-		break
-	    case "3":
-		console.log('This is the ropsten test network.')
-		break
-	    case "4":
-		console.log('This is the Rinkeby test network.')
-		break
-	    case "42":
-		console.log('This is the Kovan test network.')
-		break
-	    default:
-		console.log('This is an unknown network.')
+	    if(err){
+		errorLog(err);
+		return;
 	    }
-	})
 
-	account = web3.eth.accounts[0];
-	console.log(account)
+	    messageLog('<b>Network:</b> ' + NetworkName(netId));
 
-	
+	    if (netId != '3'){
+		errorLog('Only Ropsten network is supported. Switch networks and reload the page.');
+		return;
+	    }
+
+	    SetUpContract();
+	    
+	});
     } else {
-	console.log('No MetaMask found!')
+	errorLog("No MetaMask found! MetaMask is required for this webpage to work. Install MetaMask browser add-on here: " +
+		   selfLink('https://metamask.io/'));
+	return;
 
-	web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io/'));	
+	// web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io/'));	
     }
     
-    console.log(web3);
+    // console.log(web3);
 
     // web3.eth.getBlock(48, function(error, result){
     // 	if(!error)
@@ -46,10 +57,10 @@ window.addEventListener('load', function() {
     //         console.error(error);
     // })
 
-    runApp();
+    // runApp();
 
 
-})
+}
 
 function runApp(){
 
