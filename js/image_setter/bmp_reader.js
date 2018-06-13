@@ -1,43 +1,25 @@
-
-function BmpReaderOnLoad(){
-
-    var inputElement =  document.getElementById("input");
-    inputElement.addEventListener("change", handleFiles, false);    
+function AttachReader(element, onImageLoad){
+    element.addEventListener("change",
+			     function(e) {
+				 handleFiles(e, onImageLoad);
+			     }
+			     , false);    
 }
 
-function handleFiles(e) {
+function handleFiles(e, onImageLoad) {
     var file = e.target.files[0];
     var reader = new FileReader();
-    reader.addEventListener("load", processimage, false);
+    reader.addEventListener("load",
+			     function(e) {
+				 getBMP(e, onImageLoad);
+			     }
+			    , false);
     reader.readAsArrayBuffer(file);
 }
 
-function processimage(e) {
+function getBMP(e, onImageLoad) {
     var buffer = e.target.result;
-    var bitmap = getBMP(buffer);
-
-    errorLogClear();
-
-    var stop = false;
     
-    if (bitmap.infoheader.biBitCount != 24){
-	stop = true;
-	errorLog("Bit count needs to be 24 bit. Selected image is " + bitmap.infoheader.biBitCount + " bit.");
-    }
-    if (bitmap.infoheader.biWidth != 32 || bitmap.infoheader.biHeight != 32){
-	stop = true;
-	errorLog("Image needs to be 32x32 pixels. Selected image is " + bitmap.infoheader.biWidth + "x" + bitmap.infoheader.biHeight + ".");
-    }
-
-    if (stop)
-	return;
-
-    $('#send-div').show();
-    
-    convertToImageData(bitmap);
-}
-
-function getBMP(buffer) {
     var datav = new DataView(buffer);
     var bitmap = {};
     bitmap.fileheader = {};
@@ -82,55 +64,17 @@ function getBMP(buffer) {
     
     bitmap.pixels = 
         new Uint8Array(buffer, start);
-    return bitmap;
-}
-var colorData = [];
 
+    bitmap.getPixel = function(x,y){
+	var index = x * 3 + bitmap.stride * y;
 
-function convertToImageData(bitmap) {
-    canvas = document.createElement("canvas");
-    var ctx = canvas.getContext("2d");
-    
-    var Width = bitmap.infoheader.biWidth;
-    var Height = bitmap.infoheader.biHeight;
-    var imageData = 
-        ctx.createImageData(Width, Height);
-    var data = imageData.data;
-    var bmpdata = bitmap.pixels;
-    var stride = bitmap.stride;
+	var ret = {};
+	ret.r = bitmap.pixels[index + 2];
+	ret.g = bitmap.pixels[index + 1];
+	ret.b = bitmap.pixels[index + 0];
 
-    console.log(Width);
-    console.log(Height);
+	return ret;
+    };
 
-    var output = document.getElementById('main');
-    colorData = [];
-
-    for (var y = 0; y < Height; ++y) {
-	bt_line = '0x';
-	for (var x = 0; x < Width; ++x) {
-	    var index2 = x * 3 + stride * y;
-	    var index1 = (x+Width*(Height-y-1))*4;
-	    
-	    data[index1] = bmpdata[index2 + 2];
-	    data[index1 + 1] = bmpdata[index2 + 1];
-	    data[index1 + 2] = bmpdata[index2];
-	    data[index1 + 3] = 255;
-	    
-	    r = bmpdata[index2 + 2];
-	    g = bmpdata[index2 + 1];
-	    b = bmpdata[index2 + 0];
-	    bt = byte_letters(color_convert(r, g, b));
-	    
-	    // console.log(r, g, b, bt);
-
-	    bt_line += bt;
-	}
-	// console.log(r, g, b, ln)
-	colorData.push(bt_line);
-    }
-    
-    canvas1 = document.getElementById('canvas1');
-    ctx1 = canvas1.getContext('2d');
-    
-    ctx1.putImageData(imageData, 0, 0);
+    onImageLoad(bitmap);
 }

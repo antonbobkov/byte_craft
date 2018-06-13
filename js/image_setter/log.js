@@ -1,7 +1,12 @@
-function errorLog(error){
+function errorLogAppend(error){
     var el = $("<div>").addClass("error-message").html(error).hide();
     $("#errors").append(el);
     el.fadeIn('slow');
+}
+
+function errorLog(error){
+    errorLogClear();
+    errorLogAppend(error);
 }
 
 function errorLogClear(){
@@ -17,5 +22,9 @@ function messageLogClear(){
 }
 
 function selfLink(ref){
-    return "<a href='" + ref + "' target='_blank'>" + ref + "</a>"
+    return "<a href='" + ref + "' target='_blank'>" + ref + "</a>";
+}
+
+function jqGetHtml(obj){
+    return $('<div>').append(obj).html();
 }
