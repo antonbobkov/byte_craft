@@ -26,7 +26,9 @@ import Network.Ethereum.Web3.Provider
 import           Data.Default                      (Default (..))
 
 import Control.Monad.IO.Class
-import Control.Monad (forM)
+import Control.Concurrent
+import Control.Concurrent.Chan
+import Control.Monad (forM, forM_)
 import qualified Basement.Sized.List as L
 import Data.Word
 import Data.Bits
@@ -130,11 +132,32 @@ updateImage chunks img = R.traverse img id (maketfunc chunks)
 query :: (R.Source r Word8) => R.Array r R.DIM3 Word8 -> IO (R.Array R.D R.DIM3 Word8)
 query img = do
     manager <- newTlsManager
+
+    {-
+    blockChan <- newChan
+    let queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
+    --let queryPairs = [(x,y) | y <- [0..2], x <- [0..2]]
+    forM_ queryPairs $ \pt -> forkIO $ do
+        x <- runWeb3With manager (HttpProvider myprov) (queryBlock pt)
+        writeChan blockChan x
+
+    -- this will block indefinitely if any of the above fail
+    -- TODO fail gracefull instead, though maybe that should happen outside this function
+    chunks <- forM [1..length queryPairs] $ \_ -> do
+        b <- readChan blockChan
+        return $ either (\e -> trace (show e) undefined) id b
+    -}
+
+
+    -- DELETE
+    -- all blocks sequentially
     chunks' <- runWeb3With manager (HttpProvider myprov) web3test
+    let chunks = either (\e -> trace (show e) undefined) id chunks'
+
+    -- just a single block
     --block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
-    let
-        chunks = either (\e -> trace (show e) undefined) id chunks'
-        --chunks = [either (\e -> trace (show e) undefined) id block']
+    --let chunks = [either (\e -> trace (show e) undefined) id block']
+
     print $ makeEntries chunks
     BL.writeFile "values.json" . encode . makeEntries $ chunks
     return $ updateImage chunks img
