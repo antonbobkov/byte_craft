@@ -28,7 +28,7 @@ import           Data.Default                      (Default (..))
 import Control.Monad.IO.Class
 import Control.Concurrent
 import Control.Concurrent.Chan
-import Control.Monad (forM, forM_)
+import Control.Monad
 import qualified Basement.Sized.List as L
 import Data.Word
 import Data.Bits
@@ -129,30 +129,39 @@ updateImage ::
     -> R.Array R.D R.DIM3 Word8
 updateImage chunks img = R.traverse img id (maketfunc chunks)
 
+group :: Int -> [a] -> [[a]]
+group _ [] = []
+group n l
+  | n > 0 = (take n l) : (group n (drop n l))
+  | otherwise = error "Negative n"
+
 query :: (R.Source r Word8) => R.Array r R.DIM3 Word8 -> IO (R.Array R.D R.DIM3 Word8)
 query img = do
     manager <- newTlsManager
 
-    {-
     blockChan <- newChan
-    let queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
+    let
+        queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
+        n = 8
     --let queryPairs = [(x,y) | y <- [0..2], x <- [0..2]]
-    forM_ queryPairs $ \pt -> forkIO $ do
-        x <- runWeb3With manager (HttpProvider myprov) (queryBlock pt)
-        writeChan blockChan x
+    forM_ (group n queryPairs) $ \pts -> do
+        miniChan <- newChan
+        forM_ pts $ \pt -> forkIO $ do
+            x <- runWeb3With manager (HttpProvider myprov) (queryBlock pt)
+            writeChan miniChan x
+        replicateM_ n $ readChan miniChan >>= writeChan blockChan
 
     -- this will block indefinitely if any of the above fail
     -- TODO fail gracefull instead, though maybe that should happen outside this function
-    chunks <- forM [1..length queryPairs] $ \_ -> do
+    chunks <- replicateM (length queryPairs) $ do
         b <- readChan blockChan
         return $ either (\e -> trace (show e) undefined) id b
-    -}
 
 
     -- DELETE
     -- all blocks sequentially
-    chunks' <- runWeb3With manager (HttpProvider myprov) web3test
-    let chunks = either (\e -> trace (show e) undefined) id chunks'
+    --chunks' <- runWeb3With manager (HttpProvider myprov) web3test
+    --let chunks = either (\e -> trace (show e) undefined) id chunks'
 
     -- just a single block
     --block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
