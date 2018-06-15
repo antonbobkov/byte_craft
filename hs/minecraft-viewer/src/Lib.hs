@@ -109,7 +109,7 @@ queryBlock (x,y) = do
     return ((x,y), runPut (abiPut color), addr, fromIntegral val)
 
 toColor :: Float -> Word8 -> Word8
-toColor res w = round $ (fromIntegral w / res) * 256
+toColor res w = round $ (fromIntegral w / res) * 255
 
 -- | make traversal function to update image with updated data
 maketfunc :: [ChunkInfo] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
@@ -122,9 +122,9 @@ maketfunc chunks f s@(Z:.y:.x:.c) = final where
         (_,bs,_,_) <- find (\((x,y),_,_,_) -> xc == x && yc == y) chunks
         let word = B.index bs (yr*cwidth + xr)
         return $ if
-            | c == 0 -> toColor 8 $ shiftR (0xE0 .&. word) 5
-            | c == 1 -> toColor 8 $ shiftR (0x1C .&. word) 2
-            | c == 2 -> toColor 4 $ shiftR (0x03 .&. word) 0
+            | c == 0 -> toColor 7 $ shiftR (0xE0 .&. word) 5
+            | c == 1 -> toColor 7 $ shiftR (0x1C .&. word) 2
+            | c == 2 -> toColor 3 $ shiftR (0x03 .&. word) 0
             | c == 3 -> 255
     final = fromMaybe (f s) found
 
