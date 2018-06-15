@@ -1,6 +1,7 @@
 var account;
 var networkWebSite;
 var myContractInstance;
+var contractAddress;
 
 function GetNetworkName(netId){
     var network_names = {
@@ -76,7 +77,7 @@ function MetaMaskOnLoad(fnNext) {
 
 	    networkWebSite = GetNetworkWebSite(netId);
 	    
-	    var contractAddress = contract_address_by_network[netId];
+	    contractAddress = contract_address_by_network[netId];
 	    var contractLink = networkWebSite + 'address/' + contractAddress;
 		    
 	    messageLog('<b>Contract address:</b> ' + selfLink(contractLink));
