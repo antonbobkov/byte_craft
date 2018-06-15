@@ -5,10 +5,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE QuasiQuotes           #-}
-{-# LANGUAGE ScopedTypeVariables           #-}
-{-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE MultiWayIf           #-}
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiWayIf            #-}
+{-# LANGUAGE DeriveAnyClass        #-}
 
 module Lib (
 makeEntries,
@@ -47,18 +47,22 @@ import Control.Exception.Base
 import GHC.Generics
 import Data.Aeson
 
-[abiFrom|potato.json|]
-
-{- getColor ::
-Network.Ethereum.Web3.Types.Call
--> Network.Ethereum.ABI.Prim.Int.UIntN 8
--> Network.Ethereum.ABI.Prim.Int.UIntN 8
--> Network.Ethereum.Web3.Provider.Web3
-     (basement-0.0.7:Basement.Sized.List.ListN
-        3 (Network.Ethereum.ABI.Prim.Int.UIntN 8)) -}
-
+-- mainnet
 -- myprov = "https://api.myetherapi.com/eth"
-myprov = "https://ropsten.infura.io/"
+-- myprov = "https://ropsten.infura.io/"
+
+-- rinkby
+myCall = def { callTo = Just "0xd6a4c0b69a3019e2e833d50af2f33c961c72bd7e" }
+[abiFrom|newpotato.json|]
+myprov = "https://rinkeby.infura.io/"
+
+
+
+
+
+
+
+
 
 
 data Entry = Entry {
@@ -82,27 +86,26 @@ cwidth = 32
 cheight :: Int
 cheight = 32
 
-myCall = def { callTo = Just "0x7DBBcE351ec9334fd378A6C5Ba2ac8Dc27ea4f5C" }
-
 fst3 (x,_,_) = x
 
+type ChunkInfo = ((Int,Int), B.ByteString, Address, Int)
 -- [(x,y), color, owner, price]
-web3test :: Web3 [((Int,Int), B.ByteString, Address, Int)]
+web3test :: Web3 [ChunkInfo]
 web3test = do
     forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] queryBlock
 
-queryBlock :: (Int, Int) -> Web3 ((Int,Int), B.ByteString, Address,  Int)
+queryBlock :: (Int, Int) -> Web3 ChunkInfo
 queryBlock (x,y) = do
     liftIO (putStrLn $ "fetching " Prelude.++ show x Prelude.++ " " Prelude.++ show y)
-    (color, addr, val) <- getChunk myCall (fromIntegral x) (fromIntegral y)
+    (color, addr, val, lastBlock) <- getChunk myCall (fromIntegral x) (fromIntegral y)
     return ((x,y), runPut (abiPut color), addr, fromIntegral val)
 
 toColor :: Float -> Word8 -> Word8
 toColor res w = round $ (fromIntegral w / res) * 256
 
 -- | make traversal function to update image with updated data
-maketfunc :: [((Int,Int),B.ByteString, Address, Int)] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
-maketfunc chunks f s@(Z:.x:.y:.c) = final where
+maketfunc :: [ChunkInfo] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
+maketfunc chunks f s@(Z:.y:.x:.c) = final where
     xc = x `div` cwidth
     yc = y `div` cheight
     xr = x `mod` cwidth
@@ -118,7 +121,7 @@ maketfunc chunks f s@(Z:.x:.y:.c) = final where
     final = fromMaybe (f s) found
 
 
-makeEntries :: [((Int,Int),B.ByteString, Address, Int)] -> [Entry]
+makeEntries :: [ChunkInfo] -> [Entry]
 makeEntries = Prelude.map (\((x,y),_,addr,cost) -> Entry x y (show addr) cost)
 
 
@@ -143,7 +146,6 @@ query img = do
     let
         queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
         n = 8
-    --let queryPairs = [(x,y) | y <- [0..2], x <- [0..2]]
     forM_ (group n queryPairs) $ \pts -> do
         miniChan <- newChan
         forM_ pts $ \pt -> forkIO $ do
@@ -167,7 +169,7 @@ query img = do
     --block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
     --let chunks = [either (\e -> trace (show e) undefined) id block']
 
-    print $ makeEntries chunks
+    -- print $ makeEntries chunks
     BL.writeFile "values.json" . encode . makeEntries $ chunks
     return $ updateImage chunks img
 
