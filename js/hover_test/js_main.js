@@ -7,8 +7,12 @@ var div_h = 32;
 function ind(x,y){return y*grid_w+x;}
 
 function GlobalOnLoad(){
-    
+    $.getJSON('values.json', function(data) {
+	GlobalOnLoad2(data);
+    });
+}
 
+function GlobalOnLoad2(values){
     var meta = new Array(grid_w*grid_h);
 
     for(let m of values){
