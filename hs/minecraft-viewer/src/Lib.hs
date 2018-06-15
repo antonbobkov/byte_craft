@@ -9,6 +9,8 @@
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiWayIf            #-}
 {-# LANGUAGE DeriveAnyClass        #-}
+{-# LANGUAGE MagicHash        #-}
+{-# LANGUAGE BangPatterns        #-}
 
 module Lib (
 makeEntries,
@@ -33,11 +35,12 @@ import qualified Basement.Sized.List as L
 import Data.Word
 import Data.Bits
 import Data.Serialize.Put
+import Data.Serialize.Get
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 
 import Data.List (find)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, catMaybes, mapMaybe)
 import Data.Array.Repa as R
 import Data.Array.Repa.Eval as R
 
@@ -46,6 +49,9 @@ import Control.Exception.Base
 
 import GHC.Generics
 import Data.Aeson
+
+import GHC.Exts
+
 
 -- mainnet
 -- myprov = "https://api.myetherapi.com/eth"
@@ -81,6 +87,7 @@ bwidth = 32
 bheight :: Int
 bheight = 32
 
+-- chunk width/height
 cwidth :: Int
 cwidth = 32
 cheight :: Int
@@ -89,6 +96,7 @@ cheight = 32
 fst3 (x,_,_) = x
 
 type ChunkInfo = ((Int,Int), B.ByteString, Address, Int)
+
 -- [(x,y), color, owner, price]
 web3test :: Web3 [ChunkInfo]
 web3test = do
@@ -138,23 +146,52 @@ group n l
   | n > 0 = (take n l) : (group n (drop n l))
   | otherwise = error "Negative n"
 
+indexed :: [a] -> [(Int, a)]
+indexed xs = go 0# xs where
+    go i (a:as) = (I# i, a) : go (i +# 1#) as
+    go _ _ = []
+
+-- |
+-- TODO have this return Either error ...
 query :: (R.Source r Word8) => R.Array r R.DIM3 Word8 -> IO (R.Array R.D R.DIM3 Word8)
 query img = do
-    manager <- newTlsManager
 
+    manager <- newTlsManager
+    lastUpdated' <- BL.readFile "lastUpdate.json"
+
+    -- query block info
+    putStrLn "reading update times..."
+    updateTimes' <- runWeb3With manager (HttpProvider myprov) (getUpdateTimes myCall)
+    updated' <- runWeb3With manager (HttpProvider myprov) (lastUpdate myCall)
+    let
+        lastUpdated = fromMaybe 0 $ decode lastUpdated'
+        updateTimes'' :: (ListN 1024 (UIntN 256))
+        updateTimes'' = either (\e -> trace (show e) undefined) id $ updateTimes'
+        updateTimes :: [Int]
+        updateTimes = Prelude.map fromIntegral $ GHC.Exts.toList updateTimes''
+        updated :: Int
+        updated = either (\e -> trace (show e) undefined) fromIntegral updated'
+
+    -- query the blocks
     blockChan <- newChan
     let
-        queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
+        -- all pairs
+        --queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
+        --only updated pairs
+        queryPairs =
+            mapMaybe
+            (\(i,x) -> if x > lastUpdated then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
+            (indexed updateTimes)
         n = 8
+    putStrLn $ "querying pairs" Prelude.++ show queryPairs
     forM_ (group n queryPairs) $ \pts -> do
         miniChan <- newChan
         forM_ pts $ \pt -> forkIO $ do
             x <- runWeb3With manager (HttpProvider myprov) (queryBlock pt)
             writeChan miniChan x
-        replicateM_ n $ readChan miniChan >>= writeChan blockChan
+        replicateM_ (length pts) $ readChan miniChan >>= writeChan blockChan
 
-    -- this will block indefinitely if any of the above fail
-    -- TODO fail gracefull instead, though maybe that should happen outside this function
+    -- TODO propogate the error up
     chunks <- replicateM (length queryPairs) $ do
         b <- readChan blockChan
         return $ either (\e -> trace (show e) undefined) id b
@@ -171,6 +208,7 @@ query img = do
 
     -- print $ makeEntries chunks
     BL.writeFile "values.json" . encode . makeEntries $ chunks
+    BL.writeFile "lastUpdate.json" . encode $ updated
     return $ updateImage chunks img
 
 
