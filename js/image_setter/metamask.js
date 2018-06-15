@@ -30,6 +30,19 @@ function GetNetworkWebSite(netId){
 	return 'unknown website';
 }
 
+function logTransaction(error, result){
+    console.log(error);
+    console.log(result);
+
+    if(error){
+	errorLog(error);
+	return;
+    }
+
+    var lnk = selfLink(networkWebSite + 'tx/' + result);
+    messageLog("Transaction submitted: " + lnk);
+}
+
 function MetaMaskOnLoad(fnNext) {
     if (typeof web3 !== 'undefined') {	
 	web3 = new Web3(web3.currentProvider);
@@ -37,6 +50,7 @@ function MetaMaskOnLoad(fnNext) {
 	messageLog("MetaMask successfully detected.");
 	
 	web3.version.getNetwork((err, netId) => {
+	    
 	    if(err){
 		errorLog(err);
 		return;

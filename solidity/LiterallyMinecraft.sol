@@ -15,7 +15,11 @@ contract LiterallyMinecraft {
     
     address owner;
     uint value;
+
+    uint lastUpdate;
   }
+
+  uint public lastUpdate;
   
   Chunk[global_length] public screen;
 
@@ -26,6 +30,11 @@ contract LiterallyMinecraft {
      
   function getIndex(uint8 x, uint8 y) public pure returns(uint){
     return y*global_width+x;
+  }
+
+  function touch(uint8 x, uint8 y) internal{
+    screen[getIndex(x,y)].lastUpdate = block.timestamp;
+    lastUpdate = block.timestamp;
   }
 
   modifier withinBounds(uint8 x, uint8 y) {
@@ -42,10 +51,19 @@ contract LiterallyMinecraft {
   
   function getChunk(uint8 x, uint8 y) external view  
     withinBounds(x,y)
-    returns(bytes32[chunk_height], address, uint)
+    returns(bytes32[chunk_height], address, uint, uint)
   {
     Chunk storage p = screen[getIndex(x,y)];
-    return (p.colors, p.owner, p.value);
+    return (p.colors, p.owner, p.value, p.lastUpdate);
+  }
+
+  function getUpdateTimes() external view
+    returns(uint[global_length])
+  {
+    uint[global_length] memory ret;
+    for(uint i = 0; i < global_length; ++i)
+      ret[i] = screen[i].lastUpdate;
+    return ret;
   }
   
   
@@ -54,6 +72,7 @@ contract LiterallyMinecraft {
     hasAccess(x,y)
   {
     screen[getIndex(x,y)].colors = clr;
+    touch(x,y);
   }
 
   function takeControl(uint8 x, uint8 y) external payable
@@ -66,6 +85,7 @@ contract LiterallyMinecraft {
 
     p.owner = msg.sender;
     p.value = msg.value;
+    touch(x,y);
   }
   
   function releaseControl(uint8 x, uint8 y) external
@@ -75,6 +95,7 @@ contract LiterallyMinecraft {
     require(msg.sender == p.owner, "not controller");
 
     releaseControlInt(x,y);
+    touch(x,y);
   }
   
   function releaseControlInt(uint8 x, uint8 y) internal
@@ -90,50 +111,49 @@ contract LiterallyMinecraft {
     require (amount > 0, "no funds to withdraw");
     
     pendingReturns[msg.sender] = 0;
-    msg.sender.transfer(amount);
+    msg.sender.transfer(amount);    
+  }
+  
+}
+
+/* contract AFiller */
+/* { */
+/*   event bts(bytes32);  */
+/*   uint public constant chunk_height = 32; */
+  
+/*   constructor(address a) public{ */
+/*     LiterallyMinecraft lm = LiterallyMinecraft(a); */
+
+/*     bytes32[chunk_height] memory clrs; */
+
+/*     for(uint i = 0; i < chunk_height; ++i){ */
+/*         for(uint j = 0; j < 32; ++j){ */
+/*             bytes32 b = bytes32((i*32 + j) % 256); */
+/*             clrs[i] |= (b << j*8); */
+/*         } */
+/*         emit bts(clrs[i]); */
+/*     } */
     
-  }
+/*     lm.setColors(1, 0, clrs); */
+/*   } */
+/* } */
+
+/* contract CFiller{ */
+/*   function f(bytes32) public{} */
+/* } */
+
+
+/* contract BFiller */
+/* { */
+/*   event bts(bytes32);  */
+/*   uint public constant chunk_height = 32; */
   
-}
+/*   constructor(address a) public{ */
+/*     LiterallyMinecraft lm = LiterallyMinecraft(a); */
 
-contract AFiller
-{
-  event bts(bytes32); 
-  uint public constant chunk_height = 32;
+/*     bytes32[chunk_height] memory clrs; */
+
+/*     lm.setColors(2, 2, clrs); */
+/*   } */
   
-  constructor(address a) public{
-    LiterallyMinecraft lm = LiterallyMinecraft(a);
-
-    bytes32[chunk_height] memory clrs;
-
-    for(uint i = 0; i < chunk_height; ++i){
-        for(uint j = 0; j < 32; ++j){
-            bytes32 b = bytes32((i*32 + j) % 256);
-            clrs[i] |= (b << j*8);
-        }
-        emit bts(clrs[i]);
-    }
-    
-    lm.setColors(1, 0, clrs);
-  }
-}
-
-contract CFiller{
-  function f(bytes32) public{}
-}
-
-
-contract BFiller
-{
-  event bts(bytes32); 
-  uint public constant chunk_height = 32;
-  
-  constructor(address a) public{
-    LiterallyMinecraft lm = LiterallyMinecraft(a);
-
-    bytes32[chunk_height] memory clrs;
-
-    lm.setColors(2, 2, clrs);
-  }
-  
-}
+/* } */
