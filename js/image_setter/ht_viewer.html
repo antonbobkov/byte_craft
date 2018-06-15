@@ -7,7 +7,6 @@
   
   <script type="text/javascript" src="metamask.js"></script>
   <script type="text/javascript" src="bmp_reader.js"></script>
-  <script type="text/javascript" src="bitshift.js"></script>
   <script type="text/javascript" src="log.js"></script>
   <script type="text/javascript" src="contract_info.js"></script>
   <script type="text/javascript" src="js_viewer.js"></script>
@@ -19,31 +18,42 @@
 
       <div>
       	<p> Enter coordinates of a chunk: </p>
-      	<p> x: <input type="text" id="x" /></p>
-      	<p> y: <input type="text" id="y" /></p>
+      	<p> x: <input type="text" id="x" value="10"/></p>
+      	<p> y: <input type="text" id="y" value="10"/></p>
 
 	<div>
 	  <button id="chunk-info-btn">View Chunk Info</button>
+	  
 	  <div id="chunk-info-div">
 	  </div>
+	  
 	</div>
 	
       </div>
 
-      
-      
-      <!-- <canvas id="canvas1" width="32" height="32"> -->
-      <!-- 	Your browser does not support HTML5 Canvas. -->
-      <!-- </canvas> -->
-      
-      <!-- <p> Select a 32x32 pixels 24-bit BMP image:  <input type="file" id="input" /></p> -->
-      <!-- <div hidden id="send-div"> -->
-      <!-- 	<p> Enter coordinates of the chunk to send the image to: </p> -->
-      <!-- 	<p> x: <input type="text" id="x" /></p> -->
-      <!-- 	<p> y: <input type="text" id="y" /></p> -->
-      <!-- 	<button id="send-btn">Send Transaction</button> -->
-      <!-- </div> -->
+      <div>
+	
+	<p>
+	  <button id="balance-btn">Get Pending Balance</button>
+	  <span id="balance-span"></span>
+	</p>
+	
+	<p>
+	  <button id="withdraw-btn">Withdraw Pending Balance</button>
+	  <span id="withdraw-span"></span>
+	</p>
+	
+	<p>
+	  <button id="update-time-btn">Get Last Update Time</button>
+	  <span id="update-time-span"></span>
+	</p>
+	
+	<button id="update-all-btn">Get All Update Times</button>
+	<div id="update-all-div">
+	</div>
+      </div>
     </div>
+    
     
     <div id="errors"></div>
   </body>
