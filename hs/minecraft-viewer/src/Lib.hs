@@ -30,6 +30,7 @@ import Control.Monad.IO.Class
 import qualified Control.Monad.Parallel as Par
 import Control.Monad
 import Control.DeepSeq (deepseq)
+import Control.Exception (throw, Exception)
 
 import Data.Word
 import Data.Bits
@@ -62,8 +63,11 @@ import Control.Exception.Base
 
 -- rinkby
 myCall = def { callTo = Just "0xd6a4c0b69a3019e2e833d50af2f33c961c72bd7e" }
-[abiFrom|newpotato.json|]
 myprov = "https://rinkeby.infura.io/"
+
+-- load abi
+[abiFrom|newpotato.json|]
+
 
 
 
@@ -152,8 +156,12 @@ group n l
   | n > 0 = (take n l) : (group n (drop n l))
   | otherwise = error "Negative n"
 
+
+data AesonDecodeException = AesonDecodeException deriving (Show)
+instance Exception AesonParseException
+
 -- |
--- TODO have this return Either error ...
+-- raises all web3 exceptions
 query :: (R.Source r Word8) => R.Array r R.DIM3 Word8 -> IO (R.Array R.D R.DIM3 Word8)
 query img = do
 
@@ -166,28 +174,22 @@ query img = do
     updated' <- runWeb3With manager (HttpProvider myprov) (lastUpdate myCall)
     let
         lastUpdated = fromMaybe 0 $ decode lastUpdated'
-        updateTimes'' = either (\e -> trace (show e) undefined) id updateTimes'
-        updateTimes :: [Int]
-        updateTimes = Prelude.map fromIntegral $ GHC.Exts.toList updateTimes''
-        updated :: Int
-        updated = either (\e -> trace (show e) undefined) fromIntegral updated'
+        (updateTimes :: [Int]) = map fromIntegral $ GHC.Exts.toList (either throw id updateTimes')
+        (updated :: Int) = either throw fromIntegral updated'
 
 
     let
-        -- all pairs
-        --queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
-        --only updated pairs
+        --allPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
         queryPairs =
             mapMaybe
             (\(i,x) -> if x > lastUpdated then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
             (indexed updateTimes)
         n = 8
-
-    putStrLn $ "querying pairs" ++ show queryPairs
+    putStrLn $ "querying pairs: " ++ show queryPairs
     (chunks :: [ChunkInfo]) <- concat <$> forM (group n queryPairs) (\pts ->
         Par.forM pts $ \pt -> do
             x <- runWeb3With manager (HttpProvider myprov) (queryBlock pt)
-            return $ either (\e -> trace (show e) undefined) id x)
+            return $ either throw id x)
 
 
 
@@ -200,27 +202,29 @@ query img = do
     --block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
     --let chunks = [either (\e -> trace (show e) undefined) id block']
 
-    -- print $ makeEntries chunks
+    -- read existing entries
     inEntries' <- BL.readFile "values.json"
     let
+        --parse them
         inEntries :: [Entry]
-        inEntries = fromMaybe undefined $ decode inEntries'
-        newEntries = makeEntries chunks
+        inEntries = fromMaybe (throw AesonDecodeException) $ decode inEntries'
         -- delete existing entries
+        newEntries = makeEntries chunks
         entries' = deleteFirstsBy posEqual inEntries newEntries
         -- put them back and sort everything
         sortedEntries = entries' ++ newEntries
         entries = encode . sort $ sortedEntries
         -- log new entries
         logEntries = show $ map (\(Entry x y _ _) -> (x,y)) newEntries
+
     -- deepseq needed so BL.readFile above will finish reading and close the handle
     inEntries' `deepseq` BL.writeFile "values.json" entries
     putStrLn $ "writing values.js with " ++ show (length sortedEntries) ++ " entries"
     BL.writeFile "values.js" (BL.append "values=" entries)
     BL.writeFile "lastUpdate.json" . encode $ updated
+
+    -- log what we did
     time <- getCurrentTime
     BL.appendFile "log.txt" $ BL.pack $ show time ++ " " ++ logEntries ++ "\n"
+
     return $ updateImage chunks img
-
-
---[(ListN 32 (BytesN 32), Address, UIntN 256)]’
