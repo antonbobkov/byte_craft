@@ -25,32 +25,35 @@ import Network.Ethereum.ABI.Class
 import Network.Ethereum.Contract.TH
 import Network.Ethereum.Web3
 import Network.Ethereum.Web3.Provider
-import           Data.Default                      (Default (..))
 
 import Control.Monad.IO.Class
 import Control.Concurrent
 import Control.Concurrent.Chan
 import Control.Monad
-import qualified Basement.Sized.List as L
+import Control.DeepSeq (deepseq)
+
 import Data.Word
 import Data.Bits
 import Data.Serialize.Put
 import Data.Serialize.Get
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
-
-import Data.List (find)
+import Data.List (sort, deleteFirstsBy, find)
 import Data.Maybe (fromMaybe, catMaybes, mapMaybe)
 import Data.Array.Repa as R
 import Data.Array.Repa.Eval as R
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
+import           Data.Default                      (Default (..))
+import Data.Aeson
+import GHC.Generics
+import GHC.Exts
 
 import Debug.Trace
 import Control.Exception.Base
 
-import GHC.Generics
-import Data.Aeson
 
-import GHC.Exts
+
+
+
 
 
 -- mainnet
@@ -76,9 +79,9 @@ data Entry = Entry {
   , pos_y :: Int
   , address :: String
   , cost :: Int
-} deriving (Generic, ToJSON, FromJSON, Show)
+} deriving (Generic, ToJSON, FromJSON, Show, Ord, Eq)
 
-
+posEqual (Entry x y _ _) (Entry a b _ _) = x == a && y == b
 
 
 -- global width/height
@@ -95,18 +98,19 @@ cheight = 32
 
 fst3 (x,_,_) = x
 
-type ChunkInfo = ((Int,Int), B.ByteString, Address, Int)
+-- |
+-- [(x,y), color, owner, price, lastUpdated]
+type ChunkInfo = ((Int,Int), B.ByteString, Address, Int, Int)
 
--- [(x,y), color, owner, price]
-web3test :: Web3 [ChunkInfo]
-web3test = do
-    forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] queryBlock
+
+queryAllBlocks :: Web3 [ChunkInfo]
+queryAllBlocks = forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] queryBlock
 
 queryBlock :: (Int, Int) -> Web3 ChunkInfo
 queryBlock (x,y) = do
     liftIO (putStrLn $ "fetching " Prelude.++ show x Prelude.++ " " Prelude.++ show y)
     (color, addr, val, lastBlock) <- getChunk myCall (fromIntegral x) (fromIntegral y)
-    return ((x,y), runPut (abiPut color), addr, fromIntegral val)
+    return ((x,y), runPut (abiPut color), addr, fromIntegral val, fromIntegral lastBlock)
 
 toColor :: Float -> Word8 -> Word8
 toColor res w = round $ (fromIntegral w / res) * 255
@@ -119,7 +123,7 @@ maketfunc chunks f s@(Z:.y:.x:.c) = final where
     xr = x `mod` cwidth
     yr = y `mod` cheight
     found = do
-        (_,bs,_,_) <- find (\((x,y),_,_,_) -> xc == x && yc == y) chunks
+        (_,bs,_,_,_) <- find (\((x,y),_,_,_,_) -> xc == x && yc == y) chunks
         let word = B.index bs (yr*cwidth + xr)
         return $ if
             | c == 0 -> toColor 7 $ shiftR (0xE0 .&. word) 5
@@ -130,12 +134,12 @@ maketfunc chunks f s@(Z:.y:.x:.c) = final where
 
 
 makeEntries :: [ChunkInfo] -> [Entry]
-makeEntries = Prelude.map (\((x,y),_,addr,cost) -> Entry x y (show addr) cost)
+makeEntries = Prelude.map (\((x,y),_,addr,cost,_) -> Entry x y (show addr) cost)
 
 
 updateImage ::
     (R.Source r Word8) =>
-    [((Int,Int), B.ByteString, Address, Int)]
+    [ChunkInfo]
     -> R.Array r R.DIM3 Word8 -- ^ input array
     -> R.Array R.D R.DIM3 Word8
 updateImage chunks img = R.traverse img id (maketfunc chunks)
@@ -165,15 +169,13 @@ query img = do
     updated' <- runWeb3With manager (HttpProvider myprov) (lastUpdate myCall)
     let
         lastUpdated = fromMaybe 0 $ decode lastUpdated'
-        updateTimes'' :: (ListN 1024 (UIntN 256))
-        updateTimes'' = either (\e -> trace (show e) undefined) id $ updateTimes'
+        updateTimes'' = either (\e -> trace (show e) undefined) id updateTimes'
         updateTimes :: [Int]
         updateTimes = Prelude.map fromIntegral $ GHC.Exts.toList updateTimes''
         updated :: Int
         updated = either (\e -> trace (show e) undefined) fromIntegral updated'
 
-    -- query the blocks
-    blockChan <- newChan
+
     let
         -- all pairs
         --queryPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
@@ -183,7 +185,9 @@ query img = do
             (\(i,x) -> if x > lastUpdated then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
             (indexed updateTimes)
         n = 8
+
     putStrLn $ "querying pairs" Prelude.++ show queryPairs
+    blockChan <- newChan
     forM_ (group n queryPairs) $ \pts -> do
         miniChan <- newChan
         forM_ pts $ \pt -> forkIO $ do
@@ -199,7 +203,7 @@ query img = do
 
     -- DELETE
     -- all blocks sequentially
-    --chunks' <- runWeb3With manager (HttpProvider myprov) web3test
+    --chunks' <- runWeb3With manager (HttpProvider myprov) queryAllBlocks
     --let chunks = either (\e -> trace (show e) undefined) id chunks'
 
     -- just a single block
@@ -207,7 +211,18 @@ query img = do
     --let chunks = [either (\e -> trace (show e) undefined) id block']
 
     -- print $ makeEntries chunks
-    BL.writeFile "values.json" . encode . makeEntries $ chunks
+    inEntries' <- BL.readFile "values.json"
+    let
+        inEntries :: [Entry]
+        inEntries = fromMaybe undefined $ decode inEntries'
+        newEntries = makeEntries chunks
+        -- delete existing entries
+        entries' = deleteFirstsBy posEqual inEntries newEntries
+        -- put them back and sort everything
+        entries = encode . sort $ entries' Prelude.++ newEntries
+    -- deepseq needed so BL.readFile above will finish reading and close the handle
+    inEntries' `deepseq` BL.writeFile "values.json" entries
+    BL.writeFile "values.js" (BL.append "values=" entries)
     BL.writeFile "lastUpdate.json" . encode $ updated
     return $ updateImage chunks img
 
