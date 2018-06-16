@@ -28,8 +28,6 @@ import Network.Ethereum.Web3.Provider
 
 import Control.Monad.IO.Class
 import qualified Control.Monad.Parallel as Par
-import Control.Concurrent
-import Control.Concurrent.Chan
 import Control.Monad
 import Control.DeepSeq (deepseq)
 
@@ -186,18 +184,11 @@ query img = do
         n = 8
 
     putStrLn $ "querying pairs" ++ show queryPairs
-    blockChan <- newChan
-    forM_ (group n queryPairs) $ \pts -> do
-        miniChan <- newChan
-        forM_ pts $ \pt -> forkIO $ do
+    (chunks :: [ChunkInfo]) <- concat <$> forM (group n queryPairs) (\pts ->
+        Par.forM pts $ \pt -> do
             x <- runWeb3With manager (HttpProvider myprov) (queryBlock pt)
-            writeChan miniChan x
-        replicateM_ (length pts) $ readChan miniChan >>= writeChan blockChan
+            return $ either (\e -> trace (show e) undefined) id x)
 
-    -- TODO propogate the error up
-    chunks <- replicateM (length queryPairs) $ do
-        b <- readChan blockChan
-        return $ either (\e -> trace (show e) undefined) id b
 
 
     -- DELETE
