@@ -13,10 +13,10 @@
 {-# LANGUAGE BangPatterns        #-}
 
 module Lib (
-makeEntries,
-query,
-bwidth,
-bheight
+    makeEntries,
+    query,
+    bwidth,
+    bheight
 ) where
 
 import Network.HTTP.Client.TLS
@@ -27,6 +27,7 @@ import Network.Ethereum.Web3
 import Network.Ethereum.Web3.Provider
 
 import Control.Monad.IO.Class
+import qualified Control.Monad.Parallel as Par
 import Control.Concurrent
 import Control.Concurrent.Chan
 import Control.Monad
@@ -37,20 +38,21 @@ import Data.Bits
 import Data.Serialize.Put
 import Data.Serialize.Get
 import Data.List (sort, deleteFirstsBy, find)
+import Data.List.Index (indexed)
 import Data.Maybe (fromMaybe, catMaybes, mapMaybe)
-import Data.Array.Repa as R
+import Data.Array.Repa as R hiding ((++), map)
 import Data.Array.Repa.Eval as R
 import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy as BL hiding (pack)
+import qualified Data.ByteString.Lazy.Char8 as BL
 import           Data.Default                      (Default (..))
+import Data.Time.Clock
 import Data.Aeson
 import GHC.Generics
 import GHC.Exts
 
 import Debug.Trace
 import Control.Exception.Base
-
-
 
 
 
@@ -108,7 +110,7 @@ queryAllBlocks = forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] queryBlo
 
 queryBlock :: (Int, Int) -> Web3 ChunkInfo
 queryBlock (x,y) = do
-    liftIO (putStrLn $ "fetching " Prelude.++ show x Prelude.++ " " Prelude.++ show y)
+    liftIO (putStrLn $ "fetching " ++ show x ++ " " ++ show y)
     (color, addr, val, lastBlock) <- getChunk myCall (fromIntegral x) (fromIntegral y)
     return ((x,y), runPut (abiPut color), addr, fromIntegral val, fromIntegral lastBlock)
 
@@ -144,16 +146,13 @@ updateImage ::
     -> R.Array R.D R.DIM3 Word8
 updateImage chunks img = R.traverse img id (maketfunc chunks)
 
+-- |
+-- helper function for grouping lists
 group :: Int -> [a] -> [[a]]
 group _ [] = []
 group n l
   | n > 0 = (take n l) : (group n (drop n l))
   | otherwise = error "Negative n"
-
-indexed :: [a] -> [(Int, a)]
-indexed xs = go 0# xs where
-    go i (a:as) = (I# i, a) : go (i +# 1#) as
-    go _ _ = []
 
 -- |
 -- TODO have this return Either error ...
@@ -186,7 +185,7 @@ query img = do
             (indexed updateTimes)
         n = 8
 
-    putStrLn $ "querying pairs" Prelude.++ show queryPairs
+    putStrLn $ "querying pairs" ++ show queryPairs
     blockChan <- newChan
     forM_ (group n queryPairs) $ \pts -> do
         miniChan <- newChan
@@ -219,11 +218,17 @@ query img = do
         -- delete existing entries
         entries' = deleteFirstsBy posEqual inEntries newEntries
         -- put them back and sort everything
-        entries = encode . sort $ entries' Prelude.++ newEntries
+        sortedEntries = entries' ++ newEntries
+        entries = encode . sort $ sortedEntries
+        -- log new entries
+        logEntries = show $ map (\(Entry x y _ _) -> (x,y)) newEntries
     -- deepseq needed so BL.readFile above will finish reading and close the handle
     inEntries' `deepseq` BL.writeFile "values.json" entries
+    putStrLn $ "writing values.js with " ++ show (length sortedEntries) ++ " entries"
     BL.writeFile "values.js" (BL.append "values=" entries)
     BL.writeFile "lastUpdate.json" . encode $ updated
+    time <- getCurrentTime
+    BL.appendFile "log.txt" $ BL.pack $ show time ++ " " ++ logEntries ++ "\n"
     return $ updateImage chunks img
 
 

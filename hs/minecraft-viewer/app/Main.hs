@@ -8,6 +8,7 @@ import Data.Word
 import Codec.Picture.Repa
 import Codec.Picture
 import System.Environment (getArgs)
+import System.Exit
 
 import Debug.Trace
 import Lib
@@ -31,3 +32,6 @@ main = do
         --glossImg =  (mkPic $ wimg)
     B.writeFile "1024.png" $ imageToPng (imgToImage wimg)
     -- display (InWindow "mochi" (800,600) (0,0)) white (Scale 100 100 glossImg)
+
+    -- TODO read error codes and exit failure if error
+    exitSuccess

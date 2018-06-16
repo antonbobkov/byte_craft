@@ -35,6 +35,9 @@ dependencies:
 - cereal
 - aeson
 - deepseq
+- time
+- monad-parallel
+- ilist
 
 library:
   source-dirs: src
