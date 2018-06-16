@@ -4,12 +4,8 @@
 import Control.Exception
 import qualified Data.ByteString.Lazy as B
 import Data.Array.Repa as R hiding ((++))
---import Data.Array.Repa.Eval as R
---import Graphics.Gloss
---import Data.Word
 import Codec.Picture.Repa
 import Codec.Picture
---import System.Environment (getArgs)
 import System.Exit
 
 import Lib
@@ -40,6 +36,6 @@ makeImage prefix address provider = do
     B.writeFile filename $ imageToPng (imgToImage wimg)
 
 main = do
-    handle (\(e :: SomeException) -> exitFailure) $ makeImage "" rinkebyContractAddr rinkebyProvider
+    handle (\(e :: SomeException) -> exitFailure) $ makeImage "rb" rinkebyContractAddr rinkebyProvider
     --handle (const exitFailure) $ makeImage "" mainnetContractAddr mainnetProvider
     exitSuccess

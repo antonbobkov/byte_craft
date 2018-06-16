@@ -9,8 +9,10 @@ copyright:           "2018 Author name here"
 extra-source-files:
 - README.md
 - ChangeLog.md
-- potato.json
-- 1024.png
+- newpotato.json
+- rb1024.png
+- rblastUpdate.json
+- rbvalues.json
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package

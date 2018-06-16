@@ -1,16 +1,15 @@
 
 {-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE DeriveAnyClass        #-}
 {-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MagicHash             #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiWayIf            #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE QuasiQuotes           #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE MultiWayIf            #-}
-{-# LANGUAGE DeriveAnyClass        #-}
-{-# LANGUAGE MagicHash        #-}
-{-# LANGUAGE BangPatterns        #-}
 
 module Lib (
     makeEntries,
@@ -19,71 +18,64 @@ module Lib (
     bheight
 ) where
 
-import Network.HTTP.Client.TLS
+import           Network.HTTP.Client.TLS
 
-import Network.Ethereum.ABI.Class
-import Network.Ethereum.Contract.TH
-import Network.Ethereum.Web3
-import Network.Ethereum.Web3.Provider
+import           Network.Ethereum.ABI.Class
+import           Network.Ethereum.Contract.TH
+import           Network.Ethereum.Web3
+import           Network.Ethereum.Web3.Provider
 
-import Control.Monad.IO.Class
-import qualified Control.Monad.Parallel as Par
-import Control.Monad
-import Control.DeepSeq (deepseq)
-import Control.Exception (throw, Exception)
+import           Control.DeepSeq                (deepseq)
+import           Control.Exception              (Exception, throw)
+import           Control.Monad
+import           Control.Monad.IO.Class
+import qualified Control.Monad.Parallel         as Par
 
-import Data.Word
-import Data.Bits
-import Data.Serialize.Put
-import Data.Serialize.Get
-import Data.String (fromString)
-import Data.List (sort, deleteFirstsBy, find)
-import Data.List.Index (indexed)
-import Data.Maybe (fromMaybe, catMaybes, mapMaybe)
-import Data.Array.Repa as R hiding ((++), map)
-import Data.Array.Repa.Eval as R
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL hiding (pack)
-import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.Default                      (Default (..))
-import Data.Time.Clock
-import Data.Aeson
-import GHC.Generics
-import GHC.Exts
+import           Data.Aeson
+import           Data.Array.Repa                as R hiding (map, (++))
+import           Data.Array.Repa.Eval           as R
+import           Data.Bits
+import qualified Data.ByteString                as B
+import qualified Data.ByteString.Lazy           as BL hiding (pack)
+import qualified Data.ByteString.Lazy.Char8     as BL
+import           Data.Default                   (Default (..))
+import           Data.List                      (deleteFirstsBy, find, sort)
+import           Data.List.Index                (indexed)
+import           Data.Maybe                     (catMaybes, fromMaybe, mapMaybe)
+import           Data.Serialize.Get
+import           Data.Serialize.Put
+import           Data.String                    (fromString)
+import           Data.Time.Clock
+import           Data.Word
+import           GHC.Exts
+import           GHC.Generics
 
-import Debug.Trace
-import Control.Exception.Base
-
-
-
-
-
-
--- rinkby
-myCall = def { callTo = Just "0xd6a4c0b69a3019e2e833d50af2f33c961c72bd7e" }
-myprov = "https://rinkeby.infura.io/"
+import           Control.Exception.Base
+import           Debug.Trace
 
 -- load abi
 [abiFrom|newpotato.json|]
 
 
 
+-- |
+-- [(x,y), color, owner, price, lastUpdated]
+type ChunkInfo = ((Int,Int), B.ByteString, Address, Int, Int)
 
-
-
-
-
-
-
-
+-- |
+-- represents an entry in the image
 data Entry = Entry {
-  pos_x :: Int
-  , pos_y :: Int
+  pos_x     :: Int
+  , pos_y   :: Int
   , address :: String
-  , cost :: Int
+  , cost    :: Int
 } deriving (Generic, ToJSON, FromJSON, Show, Ord, Eq)
 
 posEqual (Entry x y _ _) (Entry a b _ _) = x == a && y == b
+
+
+makeEntries :: [ChunkInfo] -> [Entry]
+makeEntries = Prelude.map (\((x,y),_,addr,cost,_) -> Entry x y (show addr) cost)
 
 
 -- global width/height
@@ -98,26 +90,25 @@ cwidth = 32
 cheight :: Int
 cheight = 32
 
+-- helper
 fst3 (x,_,_) = x
 
 -- |
--- [(x,y), color, owner, price, lastUpdated]
-type ChunkInfo = ((Int,Int), B.ByteString, Address, Int, Int)
-
-
-queryAllBlocks :: Web3 [ChunkInfo]
-queryAllBlocks = forM [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]] queryBlock
-
-queryBlock :: (Int, Int) -> Web3 ChunkInfo
-queryBlock (x,y) = do
+-- query a single block in the contract
+queryBlock :: Call -> (Int, Int) -> Web3 ChunkInfo
+queryBlock call (x,y) = do
     liftIO (putStrLn $ "fetching " ++ show x ++ " " ++ show y)
-    (color, addr, val, lastBlock) <- getChunk myCall (fromIntegral x) (fromIntegral y)
+    (color, addr, val, lastBlock) <- getChunk call (fromIntegral x) (fromIntegral y)
     return ((x,y), runPut (abiPut color), addr, fromIntegral val, fromIntegral lastBlock)
 
-toColor :: Float -> Word8 -> Word8
+-- helper to convert 8bit color to 32 bit color
+toColor ::
+    Float -- ^ max resolution
+    -> Word8 -- ^ 8 bit color component
+    -> Word8 -- ^ 32 bit color component
 toColor res w = round $ (fromIntegral w / res) * 255
 
--- | make traversal function to update image with updated data
+-- make traversal function to update image with updated data
 maketfunc :: [ChunkInfo] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
 maketfunc chunks f s@(Z:.y:.x:.c) = final where
     xc = x `div` cwidth
@@ -134,11 +125,8 @@ maketfunc chunks f s@(Z:.y:.x:.c) = final where
             | c == 3 -> 255
     final = fromMaybe (f s) found
 
-
-makeEntries :: [ChunkInfo] -> [Entry]
-makeEntries = Prelude.map (\((x,y),_,addr,cost,_) -> Entry x y (show addr) cost)
-
-
+-- |
+-- update the repa array image with given chunk info
 updateImage ::
     (R.Source r Word8) =>
     [ChunkInfo]
@@ -154,22 +142,12 @@ group n l
   | n > 0 = (take n l) : (group n (drop n l))
   | otherwise = error "Negative n"
 
-
+-- exception
 data AesonDecodeException = AesonDecodeException deriving (Show)
 instance Exception AesonDecodeException
 
-
-
--- mainnet
--- myprov = "https://api.myetherapi.com/eth"
--- myprov = "https://ropsten.infura.io/"
-
--- rinkby
-
-
-
 -- |
--- raises all web3 exceptions
+-- throws exceptions on failure
 query ::
     (R.Source r Word8) =>
     String -- ^ prefix
@@ -181,14 +159,14 @@ query prefix address provider_ img = do
 
     manager <- newTlsManager
     let
-        myCall = def { callTo = Just (fromString address) }
+        callData = def { callTo = Just (fromString address) }
         provider = HttpProvider provider_
         doW3 = runWeb3With manager provider
 
     putStrLn "reading update times..."
-    lastUpdated' <- BL.readFile "lastUpdate.json"
-    updateTimes' <- doW3 (getUpdateTimes myCall)
-    updated' <- doW3 (lastUpdate myCall)
+    lastUpdated' <- BL.readFile (prefix ++ "lastUpdate.json")
+    updateTimes' <- doW3 (getUpdateTimes callData)
+    updated' <- doW3 (lastUpdate callData)
     let
         lastUpdated = fromMaybe 0 $ decode lastUpdated'
         (updateTimes :: [Int]) = map fromIntegral $ GHC.Exts.toList (either throw id updateTimes')
@@ -201,26 +179,16 @@ query prefix address provider_ img = do
             mapMaybe
             (\(i,x) -> if x > lastUpdated then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
             (indexed updateTimes)
+        -- make 8 http requests at once, this is a reasonable and safe number
         n = 8
     putStrLn $ "querying pairs: " ++ show queryPairs
     (chunks :: [ChunkInfo]) <- concat <$> forM (group n queryPairs) (\pts ->
         Par.forM pts $ \pt -> do
-            x <- runWeb3With manager (HttpProvider myprov) (queryBlock pt)
+            x <- runWeb3With manager provider (queryBlock callData pt)
             return $ either throw id x)
 
-
-
-    -- DELETE
-    -- all blocks sequentially
-    --chunks' <- runWeb3With manager (HttpProvider myprov) queryAllBlocks
-    --let chunks = either (\e -> trace (show e) undefined) id chunks'
-
-    -- just a single block
-    --block' <- runWeb3With manager (HttpProvider myprov) $ queryBlock (0,0)
-    --let chunks = [either (\e -> trace (show e) undefined) id block']
-
     -- read existing entries
-    inEntries' <- BL.readFile "values.json"
+    inEntries' <- BL.readFile (prefix ++ "values.json")
     let
         --parse them
         inEntries :: [Entry]
@@ -235,13 +203,14 @@ query prefix address provider_ img = do
         logEntries = show $ map (\(Entry x y _ _) -> (x,y)) newEntries
 
     -- deepseq needed so BL.readFile above will finish reading and close the handle
-    inEntries' `deepseq` BL.writeFile "values.json" entries
+    inEntries' `deepseq` BL.writeFile (prefix ++ "values.json") entries
     putStrLn $ "writing values.js with " ++ show (length sortedEntries) ++ " entries"
-    BL.writeFile "values.js" (BL.append "values=" entries)
-    BL.writeFile "lastUpdate.json" . encode $ updated
+    BL.writeFile (prefix ++ "values.js") (BL.append "values=" entries)
+    BL.writeFile (prefix ++ "lastUpdate.json") . encode $ updated
 
     -- log what we did
     time <- getCurrentTime
-    BL.appendFile "log.txt" $ BL.pack $ show time ++ " " ++ logEntries ++ "\n"
+    BL.appendFile "log.txt" $ BL.pack $
+        prefix ++ " " ++ show time ++ " " ++ logEntries ++ "\n"
 
     return $ updateImage chunks img

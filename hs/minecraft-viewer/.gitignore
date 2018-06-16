@@ -1,5 +1,5 @@
 .stack-work/
-values.js
+*values.js
 minecraft-viewer.cabal
 log.txt
 *~
