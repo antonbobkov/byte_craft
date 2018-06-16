@@ -36,6 +36,7 @@ import Data.Word
 import Data.Bits
 import Data.Serialize.Put
 import Data.Serialize.Get
+import Data.String (fromString)
 import Data.List (sort, deleteFirstsBy, find)
 import Data.List.Index (indexed)
 import Data.Maybe (fromMaybe, catMaybes, mapMaybe)
@@ -57,9 +58,6 @@ import Control.Exception.Base
 
 
 
--- mainnet
--- myprov = "https://api.myetherapi.com/eth"
--- myprov = "https://ropsten.infura.io/"
 
 -- rinkby
 myCall = def { callTo = Just "0xd6a4c0b69a3019e2e833d50af2f33c961c72bd7e" }
@@ -158,20 +156,39 @@ group n l
 
 
 data AesonDecodeException = AesonDecodeException deriving (Show)
-instance Exception AesonParseException
+instance Exception AesonDecodeException
+
+
+
+-- mainnet
+-- myprov = "https://api.myetherapi.com/eth"
+-- myprov = "https://ropsten.infura.io/"
+
+-- rinkby
+
+
 
 -- |
 -- raises all web3 exceptions
-query :: (R.Source r Word8) => R.Array r R.DIM3 Word8 -> IO (R.Array R.D R.DIM3 Word8)
-query img = do
+query ::
+    (R.Source r Word8) =>
+    String -- ^ prefix
+    -> String -- ^ address
+    -> String -- ^ provider
+    -> R.Array r R.DIM3 Word8 -- ^ input image
+    -> IO (R.Array R.D R.DIM3 Word8)
+query prefix address provider_ img = do
 
     manager <- newTlsManager
-    lastUpdated' <- BL.readFile "lastUpdate.json"
+    let
+        myCall = def { callTo = Just (fromString address) }
+        provider = HttpProvider provider_
+        doW3 = runWeb3With manager provider
 
-    -- query block info
     putStrLn "reading update times..."
-    updateTimes' <- runWeb3With manager (HttpProvider myprov) (getUpdateTimes myCall)
-    updated' <- runWeb3With manager (HttpProvider myprov) (lastUpdate myCall)
+    lastUpdated' <- BL.readFile "lastUpdate.json"
+    updateTimes' <- doW3 (getUpdateTimes myCall)
+    updated' <- doW3 (lastUpdate myCall)
     let
         lastUpdated = fromMaybe 0 $ decode lastUpdated'
         (updateTimes :: [Int]) = map fromIntegral $ GHC.Exts.toList (either throw id updateTimes')
