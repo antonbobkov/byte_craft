@@ -12,24 +12,23 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 
 module Lib (
-    makeEntries,
-    query,
-    bwidth,
-    bheight
+    query
 ) where
 
 import           Network.HTTP.Client.TLS
-
 import           Network.Ethereum.ABI.Class
 import           Network.Ethereum.Contract.TH
 import           Network.Ethereum.Web3
 import           Network.Ethereum.Web3.Provider
 
+import           Control.Exception.Base
 import           Control.DeepSeq                (deepseq)
 import           Control.Exception              (Exception, throw)
 import           Control.Monad
 import           Control.Monad.IO.Class
 import qualified Control.Monad.Parallel         as Par
+import           GHC.Exts
+import           GHC.Generics
 
 import           Data.Aeson
 import           Data.Array.Repa                as R hiding (map, (++))
@@ -47,16 +46,11 @@ import           Data.Serialize.Put
 import           Data.String                    (fromString)
 import           Data.Time.Clock
 import           Data.Word
-import           GHC.Exts
-import           GHC.Generics
 
-import           Control.Exception.Base
-import           Debug.Trace
+
 
 -- load abi
 [abiFrom|newpotato.json|]
-
-
 
 -- |
 -- [(x,y), color, owner, price, lastUpdated]
@@ -71,8 +65,8 @@ data Entry = Entry {
   , cost    :: Int
 } deriving (Generic, ToJSON, FromJSON, Show, Ord, Eq)
 
+posEqual :: Entry -> Entry -> Bool
 posEqual (Entry x y _ _) (Entry a b _ _) = x == a && y == b
-
 
 makeEntries :: [ChunkInfo] -> [Entry]
 makeEntries = Prelude.map (\((x,y),_,addr,cost,_) -> Entry x y (show addr) cost)
@@ -139,7 +133,7 @@ updateImage chunks img = R.traverse img id (maketfunc chunks)
 group :: Int -> [a] -> [[a]]
 group _ [] = []
 group n l
-  | n > 0 = (take n l) : (group n (drop n l))
+  | n > 0 = take n l : group n (drop n l)
   | otherwise = error "Negative n"
 
 -- exception

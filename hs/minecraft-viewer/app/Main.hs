@@ -16,7 +16,6 @@ rinkebyProvider = "https://rinkeby.infura.io/"
 --mainnetContractAddr =
 --mainnetProvider = https://api.myetherapi.com/eth
 
-
 makeImage ::
     String
     -> String
