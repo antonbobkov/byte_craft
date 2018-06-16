@@ -14,7 +14,10 @@ function errorLogClear(){
 }
 
 function messageLog(msg){
-    $("#messages").append($("<div>").addClass("message").html(msg));
+    $("<span>").addClass("message").html(msg).appendTo($('#messages'));
+    $('<br>').appendTo($('#messages'));
+    
+    $('#messages').animate({scrollTop: $('#messages').get(0).scrollHeight}, 2000);
 }
 
 function messageLogClear(){

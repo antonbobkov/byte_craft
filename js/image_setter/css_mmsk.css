@@ -1,12 +1,23 @@
 canvas {
   border: 2px solid black;
-  margin: 10px;
+  /* margin: 5px; */
 }
 
 div {
   border: 1px solid black;
-  margin: 5px;
+  margin: 1px;
   padding: 5px;
+  padding-left:10px;
+}
+
+#errors{
+  border: 0px solid black;
+}
+
+#messages{
+    overflow:auto;
+    height:100px;
+    width:800px;
 }
 
 .error-message{
