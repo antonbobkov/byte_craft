@@ -175,9 +175,9 @@ query prefix address provider_ img = do
         -- make 8 http requests at once, this is a reasonable and safe number
         n = 8
     putStrLn $ "querying pairs: " ++ show queryPairs
-    (chunks :: [ChunkInfo]) <- concat <$> forM (group n queryPairs) (\pts ->
+    chunks <- concat <$> forM (group n queryPairs) (\pts ->
         Par.forM pts $ \pt -> do
-            x <- runWeb3With manager provider (queryBlock callData pt)
+            x <- doW3 (queryBlock callData pt)
             return $ either throw id x)
 
     -- read existing entries
