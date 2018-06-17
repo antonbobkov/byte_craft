@@ -71,7 +71,6 @@ posEqual (Entry x y _ _) (Entry a b _ _) = x == a && y == b
 makeEntries :: [ChunkInfo] -> [Entry]
 makeEntries = Prelude.map (\((x,y),_,addr,cost,_) -> Entry x y (show addr) cost)
 
-
 -- global width/height
 bwidth :: Int
 bwidth = 32
@@ -96,11 +95,11 @@ queryBlock call (x,y) = do
     return ((x,y), runPut (abiPut color), addr, fromIntegral val, fromIntegral lastBlock)
 
 -- helper to convert 8bit color to 32 bit color
-toColor ::
+convert8To32 ::
     Float -- ^ max resolution
     -> Word8 -- ^ 8 bit color component
     -> Word8 -- ^ 32 bit color component
-toColor res w = round $ (fromIntegral w / res) * 255
+convert8To32 res w = round $ (fromIntegral w / res) * 255
 
 -- make traversal function to update image with updated data
 maketfunc :: [ChunkInfo] -> (R.DIM3 -> Word8) -> R.DIM3 -> Word8
@@ -113,9 +112,9 @@ maketfunc chunks f s@(Z:.y:.x:.c) = final where
         (_,bs,_,_,_) <- find (\((x,y),_,_,_,_) -> xc == x && yc == y) chunks
         let word = B.index bs (yr*cwidth + xr)
         return $ if
-            | c == 0 -> toColor 7 $ shiftR (0xE0 .&. word) 5
-            | c == 1 -> toColor 7 $ shiftR (0x1C .&. word) 2
-            | c == 2 -> toColor 3 $ shiftR (0x03 .&. word) 0
+            | c == 0 -> convert8To32 7 $ shiftR (0xE0 .&. word) 5
+            | c == 1 -> convert8To32 7 $ shiftR (0x1C .&. word) 2
+            | c == 2 -> convert8To32 3 $ shiftR (0x03 .&. word) 0
             | c == 3 -> 255
     final = fromMaybe (f s) found
 

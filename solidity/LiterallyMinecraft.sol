@@ -1,70 +1,122 @@
 pragma solidity ^0.4.0;
 
-
 contract LiterallyMinecraft {
+
+  // total number of chunks
   uint constant global_width = 32;
   uint constant global_height = 32;
   uint constant global_length = global_width*global_height;
 
-  uint constant chunk_width = 32*1; // must be multiple of 32
-  uint constant chunk_height = 32;
-  uint constant chunk_length = chunk_width*chunk_height;
+  // size of chunk in bytes32
+  uint constant chunk_size = 32;
 
+  // represents a 32x32 8-bit image with owner and stake meta data
   struct Chunk {
-    bytes32[chunk_width*chunk_height/32] colors;
+    bytes32[chunk_size] colors;
 
     address owner;
     uint value;
-
-    uint lastUpdate;
   }
 
+  // block number of last update
   uint public lastUpdate;
 
+  // block number of last update for each individual block
+  uint[global_length] public updateTimes;
+
+  // chunk array in row major order
   Chunk[global_length] public screen;
 
   constructor() public{
+
   }
 
+  // helper index conversion function
   function getIndex(uint8 x, uint8 y) public pure returns(uint) {
     return y*global_width+x;
   }
 
+  // access chunk data by x y coordinates
   function getChunk(uint8 x, uint8 y) external view
     withinBounds(x,y)
-    returns(bytes32[chunk_height], address, uint, uint)
+    returns(bytes32[chunk_size], address, uint, uint)
   {
-    Chunk storage p = screen[getIndex(x,y)];
-    return (p.colors, p.owner, p.value, p.lastUpdate);
+    uint index = getIndex(x,y);
+    if (updateTimes[index] == 0)
+    {
+      bytes32[chunk_size] memory cat;
+      cat[0] = hex"0000000000000000000000000000000000000000000000000000000000000000";
+      cat[1] = hex"0000000000000000000000000000000000000000000000000000000000000000";
+      cat[2] = hex"0000e3e300e0e0e0001c1c1c0000000000000000000000000000000000000000";
+      cat[3] = hex"0000e30000e000e000001c000000000000fc000000fc0000000000f0f0f00000";
+      cat[4] = hex"0000e30000e0e0e000001c000000000000fcfc00fcfc0000000000f000000000";
+      cat[5] = hex"0000e3e300e000e000001c000000000000fcfcfcfcfc0000000000f000f00000";
+      cat[6] = hex"00000000000000000000000000000000fcfcfcfcfcfcfc00000000f0f0f00000";
+      cat[7] = hex"000000000000000000000000000000fcfcfcfcfcfcfcfcfc0000000000000000";
+      cat[8] = hex"00000000000000000000000000001ffcfc0000fcfc0000fc000000fcfcfc0000";
+      cat[9] = hex"00000000000000000000000000001ffcfcfcfcfcfcfcfcfc000000fc00fc0000";
+      cat[10] = hex"00000000000000ff000000001f1f1ffcfcfcfc0000fcfcfc000000fcfcfc0000";
+      cat[11] = hex"0000000000ffff00000000001f1f1f1ffcfc00fcfc00fc00000000fc00fc0000";
+      cat[12] = hex"00000000ff0000000000001f1ffcfc1f1ffcfcfcfcfc1f1f0000000000000000";
+      cat[13] = hex"000000ff00000000ff00000000fcfc1f1f1f1f1f1f1f1f1f00001f0000001f00";
+      cat[14] = hex"0000ff000000ffff00000000fcfc1f1f1f1f1f1f1f1f1f1f00001f1f001f1f00";
+      cat[15] = hex"0000ffff00ff00000000fcfcfc001f1f1ffc1f1f1f1f1f0000001f001f001f00";
+      cat[16] = hex"000000ffff000000ffff00000000001ffcfc1f1f1f1f1f0000001f0000001f00";
+      cat[17] = hex"00000000ffff00ff00000000ff000000fc1f1f1f1f1f1f0000001f0000001f00";
+      cat[18] = hex"0000000000ffff000000ffff0000fcfc001f1f1f1f1f00000000000000000000";
+      cat[19] = hex"000000000000ffff00ff00000000ff0000001f1f1f000000000000ffffff0000";
+      cat[20] = hex"00000000000000ffff000000ffff00000000001f1f000000000000ff00000000";
+      cat[21] = hex"0000000000000000ffff00ff00000000ff00000000000000000000ffff000000";
+      cat[22] = hex"000000000000000000ffff000000ffff0000000000000000000000ff00000000";
+      cat[23] = hex"00000000000000000000ffff00ff00000000ff0000000000000000ffffff0000";
+      cat[24] = hex"0000000000000000000000ffff000000ffff00000000ff000000000000000000";
+      cat[25] = hex"000000000000000000000000ffff00ff00000000ff0000ff0000000000000000";
+      cat[26] = hex"00000000000000000000000000ffff000000ffff0000ff000000000000000000";
+      cat[27] = hex"0000000000000000000000000000ffff00ff000000ff00000000000000000000";
+      cat[28] = hex"000000000000000000000000000000ffff0000ffff0000000000000000000000";
+      cat[29] = hex"00000000000000000000000000000000ffffff00000000000000000000000000";
+      cat[30] = hex"0000000000000000000000000000000000000000000000000000000000000000";
+      cat[31] = hex"0000000000000000000000000000000000000000000000000000000000000000";
+      return (cat, 0x0, 0, 0);
+    }
+    Chunk storage p = screen[index];
+    return (p.colors, p.owner, p.value, updateTimes[index]);
   }
 
+  // this forces abi to give us the whole array
   function getUpdateTimes() external view
     returns(uint[global_length])
   {
-    uint[global_length] memory ret;
-    for(uint i = 0; i < global_length; ++i)
-      ret[i] = screen[i].lastUpdate;
-    return ret;
+    return updateTimes;
   }
 
+  // modifier to check if point is in bounds
   modifier withinBounds(uint8 x, uint8 y) {
     require(x >= 0 && x < global_width, "x out of range");
     require(y >= 0 && y < global_height, "y out of range");
     _;
   }
 
+  // check if msg value is sufficient to take control of a chunk
   modifier hasTheMoneys(uint8 x, uint8 y) {
     Chunk storage p = screen[getIndex(x,y)];
     require(msg.value > p.value, "insufficient funds");
     _;
   }
 
+  // indicate the chunk has been updated
   function touch(uint8 x, uint8 y) internal {
-    screen[getIndex(x,y)].lastUpdate = block.number;
+    updateTimes[getIndex(x,y)] = block.number;
     lastUpdate = block.number;
   }
 
-  function setColors(uint8 x, uint8 y, bytes32[chunk_height] clr) external payable
+  // This function claims a chunk in the screen grid.
+  // In order to claim it, the amount paid needs to
+  // exceed the amount that was last paid on the chunk
+  // (starting at 0). If another user takes control of
+  // this chunk, the last user will be refunded the
+  // ether they staked.
+  function setColors(uint8 x, uint8 y, bytes32[chunk_size] clr) external payable
     withinBounds(x,y)
     hasTheMoneys(x,y)
   {

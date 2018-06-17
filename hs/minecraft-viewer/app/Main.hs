@@ -9,8 +9,9 @@ import Codec.Picture
 import System.Exit
 
 import Lib
+import Cat
 
-rinkebyContractAddr = "0xd6a4c0b69a3019e2e833d50af2f33c961c72bd7e"
+rinkebyContractAddr = "0x4c1b0c7D66601fb3a1b526D6154452F0f7C9B33E"
 rinkebyProvider = "https://rinkeby.infura.io/"
 
 --mainnetContractAddr =

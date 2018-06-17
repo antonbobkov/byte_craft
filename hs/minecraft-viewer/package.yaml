@@ -38,6 +38,8 @@ dependencies:
 - time
 - monad-parallel
 - ilist
+- vector
+- hexstring
 
 library:
   source-dirs: src
