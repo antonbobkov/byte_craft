@@ -158,7 +158,7 @@ query prefix address provider_ img = do
 
     putStrLn "reading update times..."
     lastUpdated' <- BL.readFile (prefix ++ "lastUpdate.json")
-    updateTimes' <- doW3 (getUpdateTimes callData)
+    updateTimes' <- doW3 (lastUpdateByChunk callData)
     updated' <- doW3 (lastUpdate callData)
     let
         lastUpdated = fromMaybe 0 $ decode lastUpdated'

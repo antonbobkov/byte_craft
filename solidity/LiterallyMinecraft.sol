@@ -18,18 +18,14 @@ contract LiterallyMinecraft {
     uint value;
   }
 
-  // block number of last update
-  uint public lastUpdate;
-
-  // block number of last update for each individual block
-  uint[global_length] public updateTimes;
-
   // chunk array in row major order
   Chunk[global_length] public screen;
+  
+  // block number of last update
+  uint public lastUpdateOverall;
 
-  constructor() public{
-
-  }
+  // block number of last update for each individual block
+  uint[global_length] public lastUpdateByChunk;
 
   // helper index conversion function
   function getIndex(uint8 x, uint8 y) public pure returns(uint) {
@@ -42,7 +38,7 @@ contract LiterallyMinecraft {
     returns(bytes32[chunk_size], address, uint, uint)
   {
     uint index = getIndex(x,y);
-    if (updateTimes[index] == 0)
+    if (lastUpdateByChunk[index] == 0)
     {
       bytes32[chunk_size] memory cat;
       cat[0] = hex"0000000000000000000000000000000000000000000000000000000000000000";
@@ -80,14 +76,7 @@ contract LiterallyMinecraft {
       return (cat, 0x0, 0, 0);
     }
     Chunk storage p = screen[index];
-    return (p.colors, p.owner, p.value, updateTimes[index]);
-  }
-
-  // this forces abi to give us the whole array
-  function getUpdateTimes() external view
-    returns(uint[global_length])
-  {
-    return updateTimes;
+    return (p.colors, p.owner, p.value, lastUpdateByChunk[index]);
   }
 
   // modifier to check if point is in bounds
@@ -97,7 +86,7 @@ contract LiterallyMinecraft {
     _;
   }
 
-  // check if msg value is sufficient to take control of a chunk
+  // modifier to check if msg value is sufficient to take control of a chunk
   modifier hasTheMoneys(uint8 x, uint8 y) {
     Chunk storage p = screen[getIndex(x,y)];
     require(msg.value > p.value, "insufficient funds");
@@ -106,69 +95,30 @@ contract LiterallyMinecraft {
 
   // indicate the chunk has been updated
   function touch(uint8 x, uint8 y) internal {
-    updateTimes[getIndex(x,y)] = block.number;
-    lastUpdate = block.number;
+    lastUpdateByChunk[getIndex(x,y)] = block.number;
+    lastUpdateOverall = block.number;
   }
 
   // This function claims a chunk in the screen grid.
   // In order to claim it, the amount paid needs to
   // exceed the amount that was last paid on the chunk
-  // (starting at 0). If another user takes control of
-  // this chunk, the last user will be refunded the
+  // (starting at 0). Previous updater is refunded the
   // ether they staked.
   function setColors(uint8 x, uint8 y, bytes32[chunk_size] clr) external payable
     withinBounds(x,y)
     hasTheMoneys(x,y)
   {
     Chunk storage p = screen[getIndex(x,y)];
+    
     uint refund = p.value;
     address oldOwner = p.owner;
+    
     p.value = msg.value;
     p.owner = msg.sender;
     p.colors = clr;
-    oldOwner.transfer(refund);
+    
     touch(x,y);
+
+    oldOwner.transfer(refund);
   }
 }
-
-/* contract AFiller */
-/* { */
-/*   event bts(bytes32);  */
-/*   uint public constant chunk_height = 32; */
-
-/*   constructor(address a) public{ */
-/*     LiterallyMinecraft lm = LiterallyMinecraft(a); */
-
-/*     bytes32[chunk_height] memory clrs; */
-
-/*     for(uint i = 0; i < chunk_height; ++i){ */
-/*         for(uint j = 0; j < 32; ++j){ */
-/*             bytes32 b = bytes32((i*32 + j) % 256); */
-/*             clrs[i] |= (b << j*8); */
-/*         } */
-/*         emit bts(clrs[i]); */
-/*     } */
-
-/*     lm.setColors(1, 0, clrs); */
-/*   } */
-/* } */
-
-/* contract CFiller{ */
-/*   function f(bytes32) public{} */
-/* } */
-
-
-/* contract BFiller */
-/* { */
-/*   event bts(bytes32);  */
-/*   uint public constant chunk_height = 32; */
-
-/*   constructor(address a) public{ */
-/*     LiterallyMinecraft lm = LiterallyMinecraft(a); */
-
-/*     bytes32[chunk_height] memory clrs; */
-
-/*     lm.setColors(2, 2, clrs); */
-/*   } */
-
-/* } */
