@@ -7,12 +7,6 @@ var div_h = 32;
 function ind(x,y){return y*grid_w+x;}
 
 function GlobalOnLoad(){
-    $.getJSON('values.json', function(data) {
-	GlobalOnLoad2(data);
-    });
-}
-
-function GlobalOnLoad2(values){
     var meta = new Array(grid_w*grid_h);
 
     for(let m of values){
@@ -22,7 +16,7 @@ function GlobalOnLoad2(values){
     var bd = $('body');
     var main = $('<div>').width(div_w*grid_w).height(div_h*grid_h).addClass('main').appendTo(bd);
 
-    $('<image src="1024.png">').appendTo(main);
+    $('<image src="http://35.231.252.205/rb1024.png">').appendTo(main);
 
     for(var x = 0; x < grid_w; ++x)
 	for(var y = 0; y < grid_h; ++y){
@@ -36,9 +30,16 @@ function GlobalOnLoad2(values){
 		for(k in m)
 		    title += k + ': ' + m[k] + '\n';
 	    }
+
+	    let addr = "../image_setter/ht_main.html?" + "x=" + x + "&" + "y=" + y;
 	    
 	    $('<div>', {title:title})
-		.css({left:x_rel, top:y_rel}).width(div_w).height(div_h).addClass('inner').appendTo(main);
+		.css({left:x_rel, top:y_rel})
+		.width(div_w)
+		.height(div_h)
+		.addClass('inner')
+		.click(function () {location.href = addr;})
+		.appendTo(main);
 	}
 
     // $('[data-toggle="tooltip"]').tooltip();

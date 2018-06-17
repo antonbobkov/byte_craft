@@ -44,7 +44,7 @@ function logTransaction(error, result){
     messageLog("Transaction submitted: " + lnk);
 }
 
-function MetaMaskOnLoad(fnNext) {
+function MetaMaskOnLoad(fnNext, forceNetId=undefined) {
     if (typeof web3 !== 'undefined') {	
 	web3 = new Web3(web3.currentProvider);
 	
@@ -58,6 +58,11 @@ function MetaMaskOnLoad(fnNext) {
 	    }
 
 	    messageLog('<b>Network:</b> ' + GetNetworkName(netId));
+
+	    if(forceNetId !== undefined && forceNetId != netId){
+		errorLog("Please switch metamask network to " + GetNetworkName(forceNetId) + ", and reload the page.");
+		return;		
+	    }
 
 	    if (!(netId in contract_address_by_network))
 	    {

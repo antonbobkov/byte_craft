@@ -1,5 +1,14 @@
 function GlobalOnLoad(){
-    MetaMaskOnLoad(SetUpContract);
+    var GET = getGET();
+
+    var forceNetId;
+    
+    if('netId' in GET)
+	forceNetId = GET['netId'];
+    else
+	forceNetId = undefined;
+    
+    MetaMaskOnLoad(SetUpContract, forceNetId);
 
     AttachReader($('#input').get(0), onImageLoad);
     // AttachReader(document.getElementById('input'), onImageLoad);
@@ -11,6 +20,13 @@ function SetUpContract(){
 
     $('#chunk-info-btn').click(GetChunkInfo);    
     $('#upload-btn').click(SetColors);
+
+    var GET = getGET();
+
+    if('x' in GET){
+	$('#x').val(GET['x']);
+	$('#y').val(GET['y']);
+    }
     
     GetChunkInfo();
 }

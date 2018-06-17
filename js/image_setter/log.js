@@ -31,3 +31,13 @@ function selfLink(ref){
 function jqGetHtml(obj){
     return $('<div>').append(obj).html();
 }
+
+function getGET(){
+    var parts = window.location.search.substr(1).split("&");
+    var GET = {};
+    for (var i = 0; i < parts.length; i++) {
+	var temp = parts[i].split("=");
+	GET[decodeURIComponent(temp[0])] = decodeURIComponent(temp[1]);
+    }
+    return GET;
+}
