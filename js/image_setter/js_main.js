@@ -6,14 +6,13 @@ function GlobalOnLoad(){
 }
 
 function SetUpContract(){    
-    $("#send-btn").click(SetData);
-    // $("#kappa-btn").click(Kappa);
+
     $('#main').show();
 
-    $('#chunk-info-btn').click(GetChunkInfo);
-    $('#balance-btn').click(GetBalance);
-    $('#withdraw-btn').click(WithdrawBalance);
+    $('#chunk-info-btn').click(GetChunkInfo);    
+    $('#upload-btn').click(SetColors);
     
+    GetChunkInfo();
 }
 
 function WithdrawBalance(){
@@ -29,6 +28,8 @@ function GetBalance(){
 	$('#balance-span').text(result.toNumber() + ' wei');
     });
 }
+
+var colorData;
 
 function onImageLoad(bitmap) {
     errorLogClear();
@@ -47,60 +48,38 @@ function onImageLoad(bitmap) {
     if (stop)
 	return;
 
-    $('#send-div').show();
-    
     convertToImageData(bitmap);
+    
+    loadByteImageToCanvas(colorData, $('#canvas1').get(0));
+
+    $('#upload-btn').prop('disabled', false);
 }
 
-var colorData = [];
 
 function convertToImageData(bitmap) {
-    
     var Width = bitmap.infoheader.biWidth;
     var Height = bitmap.infoheader.biHeight;
 
-    canvas = document.createElement("canvas");
-    var ctx = canvas.getContext("2d");
-    ctx.scale(2,2);
-    var imageData = ctx.createImageData(Width, Height);
-    var data = imageData.data;
-
-    console.log(Width);
-    console.log(Height);
-
-    var output = document.getElementById('main');
     colorData = [];
 
     for (var y = Height-1; y >= 0; --y) {
-	bt_line = '0x';
+	var bt_line = '0x';
 	for (var x = 0; x < Width; ++x) {
 	    var index1 = (x+Width*(Height-y-1))*4;
 
-	    clr = bitmap.getPixel(x, y);
+	    var clr = bitmap.getPixel(x, y);
 	    
-	    data[index1] = clr.r;
-	    data[index1 + 1] = clr.g;
-	    data[index1 + 2] = clr.b;
-	    data[index1 + 3] = 255;
+	    var bt = byte_letters(color_convert(clr.r, clr.g, clr.b));
 	    
-	    bt = byte_letters(color_convert(clr.r, clr.g, clr.b));
-	    
-	    // console.log(r, g, b, bt);
-
 	    bt_line += bt;
 	}
-	// console.log(r, g, b, ln)
 	colorData.push(bt_line);
     }
     
-    canvas1 = document.getElementById('canvas1');
-    ctx1 = canvas1.getContext('2d');
-    
-    ctx1.putImageData(imageData, 0, 0);
 }
 
 
-function SetData(){
+function SetColors(){
     var x = parseInt($('#x').val());
     var y = parseInt($('#y').val());
 
@@ -112,7 +91,8 @@ function SetData(){
 
     console.log(colorData);
         
-    myContractInstance.setColors.sendTransaction(x, y, colorData, {from:account}, logTransaction);
+    var value = $('#upload-input').val();
+    myContractInstance.setColors.sendTransaction(x, y, colorData, {value:value, from:account}, logTransaction);
     
     // for (var x = 20; x < 30; ++x)
     // 	for (var y = 20; y < 30; ++y)
@@ -122,7 +102,6 @@ function SetData(){
 
 function Kappa(){
     var verySecretPrivateKey = 'd4aa00d0e843c983caeca7b68fbdc0b1770d5a8db82edd86d79c9bcc95865579';
-
 
     tr_arr = [];
     for (var x = 20; x < 30; ++x)
@@ -199,6 +178,7 @@ function GetChunkInfo(){
 	return;
     }
 
+    $('#chunk-info-div').show();
     $('#chunk-info-div').html('<i>... loading ... </i>');
 
     myContractInstance.getChunk.call(x, y, (error,result) =>{
@@ -206,20 +186,14 @@ function GetChunkInfo(){
 	console.log(result);
 
 	if(error){
+	    $('#chunk-info-div').hide();
 	    errorLog(error);
 	    return;
 	}
 
 	var addr = result[1];
-	
-	if(addr == account){
-	    addr = '<span style="color:green; font-weight: bold">' + addr + '</span>';
-	}
-	
 	var value = result[2].toNumber();
-	var value_mil = web3.fromWei(value, 'milli');
 	var value_eth = web3.fromWei(value, 'ether');
-	var lastUpdate = result[3].toNumber();
 
 	var div = $('#chunk-info-div').html('');
 
@@ -237,43 +211,19 @@ function GetChunkInfo(){
 
 	loadByteImageToCanvas(result[0], cv.get(0));
 	
+	$('<span>').html('Last uploader: ' + addr).appendTo(p);
+	$('<br>').appendTo(p);
+	
+	$('<span>').html('Current value (wei): ' + value).appendTo(p);
+	$('<br>').appendTo(p);
+	
+	$('<span>').html('Current value (ether): ' + value_eth).appendTo(p);
+	$('<br>').appendTo(p);
+	
+	$('#upload-div').show();
 
-	$('<span>').html('Address: ' + addr).appendTo(p);
-	$('<br>').appendTo(p);
+	var val_one = (result[2].plus(web3.toBigNumber(1))).toString();
 	
-	$('<span>').html('Value (wei): ' + value).appendTo(p);
-	$('<br>').appendTo(p);
-	
-	$('<span>').html('Value (ether): ' + value_eth).appendTo(p);
-	$('<br>').appendTo(p);
-	
-	$('<span>').html('Updated: ' + lastUpdate).appendTo(p);
-	$('<br>').appendTo(p);
-
-	if(result[1] == account){
-	    $('<button>')
-		.text('Release Control')
-		.click(function() {myContractInstance.releaseControl.sendTransaction(x, y, {from:account}, logTransaction);} )
-		.appendTo(div);
-	}
-	else{
-	    var value_eth_pp = web3.fromWei(value + 1, 'ether');
-	    
-	    var p = $('<p>').text('Take control: ').appendTo(div);
-	    $('<input>')
-		.val(value_eth_pp)
-		.attr('id', 'take-control-input')
-		.appendTo(p);
-	    $('<span>')
-		.text(' (ether) ')
-		.appendTo(p);
-	    $('<button>')
-		.text('Pay')
-		.click(function() {
-		    val_eth = web3.toWei($('#take-control-input').val(), 'ether');
-		    myContractInstance.takeControl.sendTransaction(x, y, {from:account, value:val_eth}, logTransaction);
-		} )
-		.appendTo(p);	    
-	}
+	$('#upload-input').val(val_one);
     });
 }

@@ -15,73 +15,37 @@
   <body onload="GlobalOnLoad()">
     <div id="errors"></div>
     <div id="messages"></div>
-    
-    <div hidden id="main">
-      
-      <p> Select a 32x32 pixels 24-bit BMP image:  <input type="file" id="input" /></p>
-      <div hidden id="send-div">
-	<p> Enter coordinates of the chunk to send the image to: </p>
-	<p> x: <input type="text" id="x" value="0"/></p>
-	<p> y: <input type="text" id="y" value="0"/></p>
-	<button id="send-btn">Send Transaction</button>
-	<!-- <button id="kappa-btn">Kappa</button> -->
-      </div>
-    </div>
-    
-    <div>
+        
+    <div id="main">
       <p> Enter coordinates of a chunk you would like to work with: </p>
-      <p> x: <input type="text" id="xx" value="10"/></p>
-      <p> y: <input type="text" id="yy" value="10"/></p>
+      <p> x: <input type="text" id="x" value="10"/></p>
+      <p> y: <input type="text" id="y" value="10"/></p>
 
       <button id="chunk-info-btn">View Chunk Info</button>
       
-      <div id="chunk-info-div">
+      <div id="chunk-info-div" hidden>
       </div>
 
-      <div id="not-own-message-div">
-	You are not the current owner, so you cannot modify this chunk.
-      </div>
-      
-      <div id="upload-div">
-	You can upload a new image for this chunk. 
+      <div id="upload-div" hidden>
+	You can upload a new image for this chunk.
+	In order to do so you need to deposit more wei that is currently deposited on this chunk.
+	<b>Note that you only would get your deposit back if someone uploads another image to this chunk.</b>
+	
 	<p> Select a 32x32 pixels 24-bit BMP image:  <input type="file" id="input" /></p>
+	
 	<canvas id="canvas1" width="32" height="32">
 	  Your browser does not support HTML5 Canvas.
 	</canvas>
-      </div>
-      
-      <div id="release-control-div">
-	You are currently in control of this chunk. You can release control to get your deposit back.
-	<button id="release-control-btn">Release Control</button>
-      </div>
-      
-      <div id="take-control-div">
-	You can take control of this chunk by depositing a value higher than the current owner (or any positive value if there is no owner).
+	
 	<p>
 	  <span>Deposit: </span>
-	  <input type="text" id="take-control-input"/>
-	  <span> (ether) </span>
-	  <button id="take-control-btn">Take Control</button>
+	  <input type="text" id="upload-input"/>
+	  <span> (wei) </span>
+	  <button id="upload-btn" disabled>Upload</button>
 	</p>
+	
       </div>
       
-    </div>
-
-    <div>
-      <p>
-	When you release control of a chunk, you get your deposit back. View and claim it using the following buttons:
-      </p>
-      
-      <p>
-	<button id="balance-btn">Get Pending Balance</button>
-	<span id="balance-span"></span>
-      </p>
-      
-      <p>
-	<button id="withdraw-btn" disabled>Withdraw Pending Balance</button>
-	<span id="withdraw-span"></span>
-      </p>
-    </div>
   </body>
 
 </html>
