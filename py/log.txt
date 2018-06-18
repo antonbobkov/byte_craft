@@ -397,3 +397,24 @@ cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.p
 
 cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
 
+2018-06-18 00:19:45
+pwd
+/home/antongml/offline_projects/city_building_game_v1/py
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+Processing rb:
+loaded initial image of size: ((Z :. 1024) :. 1024) :. 4
+querying and constructing new image
+reading update times...
+querying pairs: []
+writing values.js with 1024 entries
+writing image
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
