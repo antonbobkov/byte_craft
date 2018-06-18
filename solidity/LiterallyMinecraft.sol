@@ -27,6 +27,13 @@ contract LiterallyMinecraft {
   // block number of last update for each individual block
   uint[global_length] public lastUpdateByChunk;
 
+// this forces abi to give us the whole array
+  function getUpdateTimes() external view
+    returns(uint[global_length])
+  {
+    return lastUpdateByChunk;
+  }  
+
   // helper index conversion function
   function getIndex(uint8 x, uint8 y) public pure returns(uint) {
     return y*global_width+x;

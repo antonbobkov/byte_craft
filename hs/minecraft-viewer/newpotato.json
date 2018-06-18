@@ -81,6 +81,20 @@
 	},
 	{
 		"constant": true,
+		"inputs": [],
+		"name": "getUpdateTimes",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[1024]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
 		"inputs": [
 			{
 				"name": "",

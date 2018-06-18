@@ -11,7 +11,7 @@ import System.Exit
 import Lib
 import Cat
 
-rinkebyContractAddr = "0xa46e5da63deb34cf34f2b5066e657476d41f6800"
+rinkebyContractAddr = "0x3392619392a51cbb58706e6a2b0d01a590b06103"
 rinkebyProvider = "https://rinkeby.infura.io/"
 
 --mainnetContractAddr =

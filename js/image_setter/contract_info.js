@@ -1,6 +1,6 @@
 var contract_address_by_network = {
     //"3":  '0x25b1658683da464587039de4664b22cc7501b142', // Ropsten
-    "4":  '0xa46e5da63deb34cf34f2b5066e657476d41f6800', // Rinkeby
+    "4":  '0x3392619392a51cbb58706e6a2b0d01a590b06103', // Rinkeby
 };
 
 var contract_abi =
@@ -87,6 +87,20 @@ var contract_abi =
 	},
 	{
 		"constant": true,
+		"inputs": [],
+		"name": "getUpdateTimes",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[1024]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
 		"inputs": [
 			{
 				"name": "",
@@ -141,4 +155,4 @@ var contract_abi =
 		"stateMutability": "view",
 		"type": "function"
 	}
-];
+]
