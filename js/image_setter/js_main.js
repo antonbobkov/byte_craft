@@ -20,6 +20,7 @@ function SetUpContract(){
 
     $('#chunk-info-btn').click(GetChunkInfo);    
     $('#upload-btn').click(SetColors);
+    // $('#upload-btn').click(Kappa);
 
     var GET = getGET();
 
@@ -119,14 +120,15 @@ function SetColors(){
 function Kappa(){
     var verySecretPrivateKey = 'd4aa00d0e843c983caeca7b68fbdc0b1770d5a8db82edd86d79c9bcc95865579';
 
-    tr_arr = [];
-    for (var x = 20; x < 30; ++x)
-	for (var y = 20; y < 30; ++y)
+    var tr_arr = [];
+    for (var y = 0; y < 32; ++y)
+	for (var x = 0; x < 32; ++x)
 	    tr_arr.push({x:x, y:y});
     console.log(tr_arr);
 
     var nonce;
     
+    console.log(colorData);
     var fn_gogogo = function(){
 	if(tr_arr.length == 0){
 	    return;
@@ -134,15 +136,19 @@ function Kappa(){
 
 	var coord = tr_arr[0];
 	tr_arr.splice(0, 1);
+
+	var s = colorData[coord.y].substring(2+coord.x*2, 2+coord.x*2+2);
+	s = '0x' + s.repeat(32);
+	var a = new Array(32).fill(s);
 	
-	var data = myContractInstance.setColors.getData(coord.x, coord.y, colorData);
+	var data = myContractInstance.setColors.getData(coord.x, coord.y, a);
 
 	var tx = new ethereumjs.Tx({
 	    nonce: nonce,
 	    gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
 	    gasLimit: 1000000,
 	    to: contractAddress,
-	    value: 0,
+	    value: 1,
 	    data: data,
 	});
 
@@ -165,7 +171,6 @@ function Kappa(){
 	    
 	    fn_gogogo();
 	});
-
     };
     
     web3.eth.getTransactionCount(account, function (err, nonce_) {
