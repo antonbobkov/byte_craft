@@ -1,92 +1,10 @@
-2018-06-16 22:58:01
-2018-06-16 22:59:01
-/home/antongml
-
-2018-06-16 23:00:01
-/home/antongml
-
-2018-06-16 23:01:01
-/home/antongml
-
-2018-06-16 23:02:01
-/home/antongml
-
-2018-06-16 23:03:01
-/home/antongml
-
-2018-06-16 23:04:01
-/home/antongml/offline_projects/city_building_game_v1/hs
-
-2018-06-16 23:06:11
-/home/antongml/offline_projects/city_building_game_v1/hs
-
-
-2018-06-16 23:09:31
-/home/antongml/offline_projects/city_building_game_v1/hs
-
-
-2018-06-16 23:10:27
-/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
-
-Processing rb:
-loaded initial image of size: ((Z :. 1024) :. 1024) :. 4
-querying and constructing new image
-reading update times...
-querying pairs: []
-writing values.js with 1024 entries
-writing image
-
+2018-06-17 00:24:53
 pwd
 /home/antongml/offline_projects/city_building_game_v1/py
 
 pwd
 /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
 
-2018-06-17 00:21:30
-HASKELL:
-stack exec viewer
-Processing rb:
-loaded initial image of size: ((Z :. 1024) :. 1024) :. 4
-querying and constructing new image
-reading update times...
-querying pairs: [(0,0),(10,10)]
-fetching 0 0
-fetching 10 10
-writing values.js with 1024 entries
-writing image
-
-cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
-
-cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json/var/www/html/
-
-pwd
-/home/antongml/offline_projects/city_building_game_v1/py
-
-pwd
-/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
-
-2018-06-17 00:22:15
-HASKELL:
-stack exec viewer
-Processing rb:
-loaded initial image of size: ((Z :. 1024) :. 1024) :. 4
-querying and constructing new image
-reading update times...
-querying pairs: []
-writing values.js with 1024 entries
-writing image
-
-cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
-
-cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json/var/www/html/
-
-pwd
-/home/antongml/offline_projects/city_building_game_v1/py
-
-pwd
-/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
-
-2018-06-17 00:22:33
 HASKELL:
 stack exec viewer
 Processing rb:
@@ -100,4 +18,382 @@ writing image
 cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
 
 cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 00:26:16
+pwd
+/home/antongml/offline_projects/city_building_game_v1/py
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+Processing rb:
+loaded initial image of size: ((Z :. 1024) :. 1024) :. 4
+querying and constructing new image
+reading update times...
+querying pairs: []
+writing values.js with 1024 entries
+writing image
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 01:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 02:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 03:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 04:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 05:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 06:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 07:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 08:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 09:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 10:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 11:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 12:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 13:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 14:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 15:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 16:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.json /var/www/html/
+
+2018-06-17 16:33:34
+pwd
+/home/antongml/offline_projects/city_building_game_v1/py
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+Processing rb:
+loaded initial image of size: ((Z :. 1024) :. 1024) :. 4
+querying and constructing new image
+reading update times...
+querying pairs: []
+writing values.js with 1024 entries
+writing image
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-17 17:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-17 18:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-17 19:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-17 20:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-17 21:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-17 22:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-17 23:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+
+2018-06-18 00:00:01
+pwd
+/home/antongml
+
+pwd
+/home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+HASKELL:
+stack exec viewer
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
 
