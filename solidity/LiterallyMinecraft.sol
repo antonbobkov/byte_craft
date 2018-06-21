@@ -46,7 +46,7 @@ contract LiterallyMinecraft {
   {
     uint index = getIndex(x,y);
     
-    if (lastUpdateByChunk[index] == 0)
+    if (lastUpdateByChunk[index] == 0)     // initial default image is gaint cat
       return (getCatImage(x,y), 0x0, 0, 0);
     
     Chunk storage p = screen[index];
@@ -93,7 +93,7 @@ contract LiterallyMinecraft {
     
     touch(x,y);
 
-    oldOwner.transfer(refund);
+    oldOwner.send(refund); // ignore if the send fails
   }
   
   function getCatImage(uint8 x, uint8 y) internal pure
@@ -135,11 +135,11 @@ contract LiterallyMinecraft {
 
     bytes32 pixel_row = cat[y][x];
       
-    pixel_row |= (pixel_row << 1*8);
-    pixel_row |= (pixel_row << 2*8);
-    pixel_row |= (pixel_row << 4*8);
-    pixel_row |= (pixel_row << 8*8);
-    pixel_row |= (pixel_row << 16*8);
+    pixel_row |= (pixel_row >> 1*8);
+    pixel_row |= (pixel_row >> 2*8);
+    pixel_row |= (pixel_row >> 4*8);
+    pixel_row |= (pixel_row >> 8*8);
+    pixel_row |= (pixel_row >> 16*8);
 
     for (y = 0; y < 32; ++y)
       cat[y] = pixel_row;
