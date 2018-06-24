@@ -158,52 +158,54 @@ query prefix address provider_ img = do
 
     putStrLn "reading update times..."
     lastUpdated' <- BL.readFile (prefix ++ "lastUpdate.json")
-    updateTimes' <- doW3 (getUpdateTimes callData)
     updated' <- doW3 (lastUpdateOverall callData)
+    updateTimes' <- doW3 (getUpdateTimes callData)
     let
         lastUpdated = fromMaybe 0 $ decode lastUpdated'
         (updateTimes :: [Int]) = map fromIntegral $ GHC.Exts.toList (either throw id updateTimes')
         (updated :: Int) = either throw fromIntegral updated'
 
+    -- check if we actually need to do anything
+    putStrLn $ show lastUpdated ++" "++show updated
+    if lastUpdated > updated then return (R.delay img) else do
+        let
+            --allPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
+            queryPairs =
+                mapMaybe
+                (\(i,x) -> if x > lastUpdated then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
+                (indexed updateTimes)
+            -- make 8 http requests at once, this is a reasonable and safe number
+            n = 8
+        putStrLn $ "querying pairs: " ++ show queryPairs
+        chunks <- concat <$> forM (group n queryPairs) (\pts ->
+            Par.forM pts $ \pt -> do
+                x <- doW3 (queryBlock callData pt)
+                return $ either throw id x)
 
-    let
-        --allPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
-        queryPairs =
-            mapMaybe
-            (\(i,x) -> if x > lastUpdated then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
-            (indexed updateTimes)
-        -- make 8 http requests at once, this is a reasonable and safe number
-        n = 8
-    putStrLn $ "querying pairs: " ++ show queryPairs
-    chunks <- concat <$> forM (group n queryPairs) (\pts ->
-        Par.forM pts $ \pt -> do
-            x <- doW3 (queryBlock callData pt)
-            return $ either throw id x)
+        -- read existing entries
+        inEntries' <- BL.readFile (prefix ++ "values.json")
+        let
+            --parse them
+            inEntries :: [Entry]
+            inEntries = fromMaybe (throw AesonDecodeException) $ decode inEntries'
+            -- delete existing entries
+            newEntries = makeEntries chunks
+            entries' = deleteFirstsBy posEqual inEntries newEntries
+            -- put them back and sort everything
+            sortedEntries = entries' ++ newEntries
+            entries = encode . sort $ sortedEntries
+            -- log new entries
+            logEntries = show $ map (\(Entry x y _ _) -> (x,y)) newEntries
 
-    -- read existing entries
-    inEntries' <- BL.readFile (prefix ++ "values.json")
-    let
-        --parse them
-        inEntries :: [Entry]
-        inEntries = fromMaybe (throw AesonDecodeException) $ decode inEntries'
-        -- delete existing entries
-        newEntries = makeEntries chunks
-        entries' = deleteFirstsBy posEqual inEntries newEntries
-        -- put them back and sort everything
-        sortedEntries = entries' ++ newEntries
-        entries = encode . sort $ sortedEntries
-        -- log new entries
-        logEntries = show $ map (\(Entry x y _ _) -> (x,y)) newEntries
+        -- deepseq needed so BL.readFile above will finish reading and close the handle
+        inEntries' `deepseq` BL.writeFile (prefix ++ "values.json") entries
+        putStrLn $ "writing values.js with " ++ show (length sortedEntries) ++ " entries"
+        BL.writeFile (prefix ++ "values.js") (BL.append "values=" entries)
+        BL.writeFile (prefix ++ "lastUpdate.json") . encode $ updated
 
-    -- deepseq needed so BL.readFile above will finish reading and close the handle
-    inEntries' `deepseq` BL.writeFile (prefix ++ "values.json") entries
-    putStrLn $ "writing values.js with " ++ show (length sortedEntries) ++ " entries"
-    BL.writeFile (prefix ++ "values.js") (BL.append "values=" entries)
-    BL.writeFile (prefix ++ "lastUpdate.json") . encode $ updated
+        -- log what we did
+        time <- getCurrentTime
+        BL.appendFile "log.txt" $ BL.pack $
+            prefix ++ " " ++ show time ++ " " ++ logEntries ++ "\n"
 
-    -- log what we did
-    time <- getCurrentTime
-    BL.appendFile "log.txt" $ BL.pack $
-        prefix ++ " " ++ show time ++ " " ++ logEntries ++ "\n"
-
-    return $ updateImage chunks img
+        return $ updateImage chunks img
