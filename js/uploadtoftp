@@ -1,1 +1,1 @@
- rsync -r hover_test/ image_setter/ cmspice@ftp.robotbear.org:bytecraft.club/
+ rsync -r final/ cmspice@ftp.robotbear.org:bytecraft.club/
