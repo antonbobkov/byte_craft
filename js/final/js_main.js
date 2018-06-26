@@ -49,8 +49,9 @@ function GlobalOnLoad(){
 
 	    if(m != undefined){
 		title = '';
-		for(k in m)
-		    title += k + ': ' + m[k] + '\n';
+		title += 'x: ' + m['pos_x'] + '\n';
+		title += 'y: ' + m['pos_y'] + '\n';
+		title += 'value: ' + m['cost'] + '\n';
 	    }
 
 	    let x_ = x;
