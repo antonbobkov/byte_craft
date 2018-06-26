@@ -6,7 +6,27 @@ var div_h = 32;
 
 function ind(x,y){return y*grid_w+x;}
 
+function loadMainImage(){
+    var img = new Image();
+    img.src = "http://35.231.252.205/rb1024.png";
+    img.onload = function(){
+	
+	var canvas = $('<canvas class="big" id="main-canvas">')
+		.appendTo($('#main_img')).get(0);
+	var ctx = canvas.getContext('2d');
+
+	var Width = img.width;
+	var Height = img.height;
+	
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img,0,0);
+    };
+}
+
 function GlobalOnLoad(){
+    // MMSK_GlobalOnLoad();
+    // test();
     var meta = new Array(grid_w*grid_h);
 
     for(let m of values){
@@ -14,9 +34,11 @@ function GlobalOnLoad(){
     }
 
     var bd = $('#img');
-    var main = $('<div>').width(div_w*grid_w).height(div_h*grid_h).addClass('main').appendTo(bd);
+    var main = $('<div id="main_img">').width(div_w*grid_w).height(div_h*grid_h).addClass('main').appendTo(bd);
 
-    $('<image src="http://35.231.252.205/rb1024.png">').appendTo(main);
+    loadMainImage();
+
+    // $('<image src="http://35.231.252.205/rb1024.png">').appendTo(main);
 
     for(var x = 0; x < grid_w; ++x)
 	for(var y = 0; y < grid_h; ++y){
@@ -51,7 +73,6 @@ function OnClickChunk(x,y){
     $('#y').val(y);
     
     if (metamask_loaded == false){
-	metamask_loaded = true;
 	MMSK_GlobalOnLoad();
     }
     else{
@@ -62,6 +83,7 @@ function OnClickChunk(x,y){
 
 
 function MMSK_GlobalOnLoad(){
+    metamask_loaded = true;
     // var GET = getGET();
 
     var forceNetId = undefined;
@@ -73,7 +95,9 @@ function MMSK_GlobalOnLoad(){
     
     MetaMaskOnLoad(SetUpContract, forceNetId);
 
-    AttachReader($('#input').get(0), onImageLoad);
+    // AttachReader($('#input').get(0), onImageLoad);
+    AttachReader($('#input').get(0), afterLoad);
+    
     // AttachReader(document.getElementById('input'), onImageLoad);
 }
 
@@ -110,6 +134,14 @@ function GetBalance(){
 }
 
 var colorData;
+
+function afterLoad(colorData_){
+    colorData = colorData_;
+    
+    loadByteImageToCanvas(colorData, $('#canvas1').get(0));
+
+    $('#upload-btn').prop('disabled', false);
+}
 
 function onImageLoad(bitmap) {
     errorLogClear();
@@ -294,6 +326,7 @@ function GetChunkInfo(){
 	var p = $('<p>').appendTo(td2);
 
 	loadByteImageToCanvas(result[0], cv.get(0));
+	loadByteImageToCanvas(result[0], $('#main-canvas').get(0), x*32, y*32);
 	
 	$('<span>').html('Last uploader: ' + addr).appendTo(p);
 	$('<br>').appendTo(p);

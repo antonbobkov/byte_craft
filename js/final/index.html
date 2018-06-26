@@ -1,7 +1,6 @@
 <!DOCTYPE HTML>
 <html>
-  <link rel="stylesheet" type="text/css" href="css_mmsk.css">
-  <link rel="stylesheet" type="text/css" href="css_hover.css">
+  <link rel="stylesheet" type="text/css" href="css_main.css">
   
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
@@ -34,7 +33,7 @@
 	In order to do so you need to deposit more wei that is currently deposited on this chunk.
 	<b>Note that you only would get your deposit back if someone uploads another image to this chunk.</b>
 	
-	<p> Select a 32x32 pixels 24-bit BMP image:  <input type="file" id="input" /></p>
+	<p> Select an image to upload (it will be cropped to 32x32):  <input type="file" id="input" /></p>
 	
 	<canvas id="canvas1" width="32" height="32">
 	  Your browser does not support HTML5 Canvas.
@@ -53,7 +52,9 @@
     <div id="img">
       <p>The following image is updated once every hour.
 	Click on a chunk to get more up-to-date information or to upload a new image.</p>
-    </div>    
+    </div>
+    <div id='test'>
+    </div>
   </body>
 
 </html>

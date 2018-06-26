@@ -1,0 +1,55 @@
+.border {
+  border: 1px solid black;
+}
+
+.main{
+    position:relative;
+    left:20px;
+    top:20px;
+}
+
+.inner{
+    position:absolute;
+}
+
+.inner:hover{
+    border: 2px solid red;
+    margin-left:-2px;
+    margin-top:-2px;
+}
+
+canvas {
+  border: 2px solid black;
+  /* margin: 5px; */
+}
+
+canvas.big{
+  border: 0px solid black;
+}
+
+div.nice {
+  border: 1px solid black;
+  margin: 1px;
+  padding: 5px;
+  padding-left:10px;
+}
+
+#chunk-info-div{
+    height:100px;
+}
+
+#errors{
+  border: 0px solid black;
+}
+
+#messages{
+    overflow:auto;
+    height:100px;
+    width:1000px;
+}
+
+.error-message{
+    color: darkred;
+    background: lightsalmon;
+    font-weight: bold;
+}

@@ -30,9 +30,63 @@ function colors_from_byte(bt){
 function AttachReader(element, onImageLoad){
     element.addEventListener("change",
 			     function(e) {
-				 handleFiles(e, onImageLoad);
+				 loadImageIntoArray(e, onImageLoad);
 			     }
 			     , false);    
+}
+
+function loadImageIntoArray(e, continueFn){
+    var reader = new FileReader();
+    reader.readAsDataURL(e.target.files[0]);
+    // console.log(e.target.files[0]);
+    reader.onload = function(event){
+        var img = new Image();
+        img.src = event.target.result;
+	// console.log(img.src);
+        img.onload = function(){
+	    var canvas = document.createElement("canvas");
+	    var ctx = canvas.getContext('2d');
+
+	    var Width = img.width;
+	    var Height = img.height;
+	    
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img,0,0);
+	    
+	    var imageData = ctx.getImageData(0,0,Width,Height);
+	    var data = imageData.data;
+	    
+	    var colorData = [];
+	    
+	    for (var y = 0; y < 32; ++y) {
+		var bt_line = '0x';
+		for (var x = 0; x < 32; ++x) {
+
+		    var clr = {};
+		    if (x < Width && y < Height){		    
+			var index1 = (x+Width*y)*4;
+
+			clr.r = data[index1];
+			clr.g = data[index1+1];
+			clr.b = data[index1+2];
+		    }
+		    else{
+			clr.r = 0;
+			clr.g = 0;
+			clr.b = 0;
+		    }
+		    
+		    var bt = byte_letters(color_convert(clr.r, clr.g, clr.b));
+		    
+		    bt_line += bt;
+		}
+		colorData.push(bt_line);
+	    }
+	    // console.log(colorData);
+	    continueFn(colorData);
+        };
+    };
 }
 
 function handleFiles(e, onImageLoad) {
@@ -108,7 +162,7 @@ function getBMP(e, onImageLoad) {
     onImageLoad(bitmap);
 }
 
-function loadByteImageToCanvas(image, canvas1) {
+function loadByteImageToCanvas(image, canvas1, x_=0, y_=0) {
     var Height = image.length;
     var Width = (image[0].length - 2)/2;
 
@@ -134,5 +188,5 @@ function loadByteImageToCanvas(image, canvas1) {
     }
     
     var ctx1 = canvas1.getContext('2d');
-    ctx1.putImageData(imageData, 0, 0);
+    ctx1.putImageData(imageData, x_, y_);
 }
