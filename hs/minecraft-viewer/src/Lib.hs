@@ -159,16 +159,17 @@ query prefix address provider_ img = do
     putStrLn "reading update times..."
     lastUpdated' <- BL.readFile (prefix ++ "lastUpdate.json")
     updated' <- doW3 (lastUpdateOverall callData)
-    updateTimes' <- doW3 (getUpdateTimes callData)
+
     let
         lastUpdated = fromMaybe 0 $ decode lastUpdated'
-        (updateTimes :: [Int]) = map fromIntegral $ GHC.Exts.toList (either throw id updateTimes')
         (updated :: Int) = either throw fromIntegral updated'
 
     -- check if we actually need to do anything
     putStrLn $ show lastUpdated ++" "++show updated
     if lastUpdated == updated then return (R.delay img) else do
+        updateTimes' <- doW3 (getUpdateTimes callData)
         let
+            (updateTimes :: [Int]) = map fromIntegral $ GHC.Exts.toList (either throw id updateTimes')
             --allPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
             queryPairs =
                 mapMaybe
