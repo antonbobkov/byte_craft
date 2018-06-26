@@ -17,7 +17,7 @@ function messageLog(msg){
     $("<span>").addClass("message").html(msg).appendTo($('#messages'));
     $('<br>').appendTo($('#messages'));
     
-    $('#messages').show().animate({scrollTop: $('#messages').get(0).scrollHeight}, 2000);
+    $('#messages').show().animate({scrollTop: $('#messages').get(0).scrollHeight}, 500);
 }
 
 function messageLogClear(){
