@@ -95,7 +95,8 @@ contract LiterallyMinecraft {
 
     oldOwner.send(refund); // ignore if the send fails
   }
-  
+
+  // Generate a giant cat image
   function getCatImage(uint8 x, uint8 y) internal pure
     returns(bytes32[chunk_size])
   {

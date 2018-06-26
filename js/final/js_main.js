@@ -7,9 +7,6 @@ var div_h = 32;
 function ind(x,y){return y*grid_w+x;}
 
 
-function SetupMainImage(){
-}
-
 function GlobalOnLoad(){
     // MMSK_GlobalOnLoad(); // not loaded until a square is clicked
 
@@ -24,8 +21,16 @@ function GlobalOnLoad(){
     var bd = $('#img');
     var main = $('<div id="main_img">').width(div_w*grid_w).height(div_h*grid_h).addClass('main').appendTo(bd);
 
+    var GET = getGET();
+
+    var img_pth = 'rb1024.png';
+    
+    if ('image' in GET) {
+	img_pth = GET['image'];
+    }
+
     var img = new Image();
-    img.src = "http://35.231.252.205/rb1024.png";
+    img.src = "http://35.231.252.205/" + img_pth;
     img.onload = function(){
 	
 	var canvas = $('<canvas class="big" id="main-canvas">')
@@ -88,6 +93,10 @@ function SetupMetamask(){
 
     var forceNetId = undefined;
     
+    var GET = getGET();
+    if ('noforcenetwork' in GET){
+	forceNetId = undefined;
+    }
     MetaMaskOnLoad(SetUpContract, forceNetId);
 
 }
