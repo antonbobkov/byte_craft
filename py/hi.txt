@@ -1,0 +1,26 @@
+2018-06-18 03:10:48
+CMD: whoami
+STDOUT: antongml
+
+CMD: echo $0
+STDOUT: /bin/sh
+
+CMD: pwd
+STDOUT: /home/antongml/offline_projects/city_building_game_v1/py
+
+CMD: pwd
+STDOUT: /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer
+
+CMD: stack exec viewer
+STDOUT: Processing rb:
+loaded initial image of size: ((Z :. 1024) :. 1024) :. 4
+querying and constructing new image
+reading update times...
+querying pairs: []
+writing values.js with 1024 entries
+writing image
+
+CMD: cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*.png /var/www/html/
+
+CMD: cp /home/antongml/offline_projects/city_building_game_v1/hs/minecraft-viewer/*values.js /var/www/html/
+

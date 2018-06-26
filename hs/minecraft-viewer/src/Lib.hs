@@ -167,12 +167,13 @@ query prefix address provider_ img = do
 
     -- check if we actually need to do anything
     putStrLn $ show lastUpdated ++" "++show updated
-    if lastUpdated > updated then return (R.delay img) else do
+    if lastUpdated == updated then return (R.delay img) else do
         let
             --allPairs = [(x,y) | y <- [0..bheight-1], x <- [0..bwidth-1]]
             queryPairs =
                 mapMaybe
-                (\(i,x) -> if x > lastUpdated then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
+                (\(i,x) -> if ((x > lastUpdated) || (lastUpdated > updated))
+                  then Just (i `mod` cwidth, i `div` cwidth) else Nothing)
                 (indexed updateTimes)
             -- make 8 http requests at once, this is a reasonable and safe number
             n = 8
