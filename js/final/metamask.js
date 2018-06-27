@@ -24,7 +24,7 @@ function GetNetworkWebSite(netId){
 	"1":  'https://etherscan.io/',
 	"3":  'https://ropsten.etherscan.io/',
 	"4":  'https://rinkeby.etherscan.io/',
-        "19": 'http://34.212.240.178:8545'
+        "19": 'http://34.212.240.178:8545/'
     };
 
     if (netId in network_web_sites)
