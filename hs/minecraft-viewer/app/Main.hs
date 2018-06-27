@@ -37,5 +37,7 @@ makeImage prefix address provider = do
 
 main = do
     handle (\(e :: SomeException) -> exitFailure) $ makeImage "rb" rinkebyContractAddr rinkebyProvider
+    handle (\(e :: SomeException) -> exitFailure) $ makeImage "main" rinkebyContractAddr rinkebyProvider
+    handle (\(e :: SomeException) -> exitFailure) $ makeImage "thunder" rinkebyContractAddr rinkebyProvider
     --handle (const exitFailure) $ makeImage "" mainnetContractAddr mainnetProvider
     exitSuccess
