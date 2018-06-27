@@ -118,6 +118,7 @@ function afterLoad(colorData_){
     colorData = colorData_;
     
     loadByteImageToCanvas(colorData, $('#canvas1').get(0));
+    $("#canvas1").show();
 
     $('#upload-btn').prop('disabled', false);
 }
