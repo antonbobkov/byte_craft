@@ -23,7 +23,7 @@ function GlobalOnLoad(){
 
     var GET = getGET();
 
-    var img_pth = 'rb1024.png';
+    var img_pth = 'main1024.png';
     
     if ('image' in GET) {
 	img_pth = GET['image'];
@@ -91,12 +91,17 @@ function OnClickChunk(x,y){
 function SetupMetamask(){
     metamask_loaded = true;
 
-    var forceNetId = undefined;
+    var forceNetId = '1';
     
     var GET = getGET();
-    if ('noforcenetwork' in GET){
+    
+    if ('noForce' in GET){
 	forceNetId = undefined;
     }
+    else if('forceNetId' in GET){
+	forceNetId = GET['forceNetId'];
+    }
+    
     MetaMaskOnLoad(SetUpContract, forceNetId);
 
 }
