@@ -17,6 +17,9 @@ rinkebyProvider = "https://rinkeby.infura.io/"
 --mainnetContractAddr =
 --mainnetProvider = https://api.myetherapi.com/eth
 
+thunderContractAddr = "0xe7b94ff151b0bd883f29708f6b0eef8ff3c17de0"
+thunderProvider = "http://34.212.240.178:8545"
+
 makeImage ::
     String
     -> String
@@ -38,6 +41,6 @@ makeImage prefix address provider = do
 main = do
     handle (\(e :: SomeException) -> exitFailure) $ makeImage "rb" rinkebyContractAddr rinkebyProvider
     handle (\(e :: SomeException) -> exitFailure) $ makeImage "main" rinkebyContractAddr rinkebyProvider
-    handle (\(e :: SomeException) -> exitFailure) $ makeImage "thunder" rinkebyContractAddr rinkebyProvider
+    handle (\(e :: SomeException) -> exitFailure) $ makeImage "thunder" thunderContractAddr thunderProvider
     --handle (const exitFailure) $ makeImage "" mainnetContractAddr mainnetProvider
     exitSuccess
