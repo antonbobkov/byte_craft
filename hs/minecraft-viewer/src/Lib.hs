@@ -201,7 +201,7 @@ query prefix address provider_ img = do
 
         -- deepseq needed so BL.readFile above will finish reading and close the handle
         inEntries' `deepseq` BL.writeFile (prefix ++ "values.json") entries
-        putStrLn $ "writing values.js with " ++ show (length sortedEntries) ++ " entries"
+        putStrLn $ "writing " ++ prefix ++ "values.js with " ++ show (length sortedEntries) ++ " entries"
         BL.writeFile (prefix ++ "values.js") (BL.append "values=" entries)
         BL.writeFile (prefix ++ "lastUpdate.json") . encode $ updated
 
