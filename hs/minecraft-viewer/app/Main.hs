@@ -17,8 +17,8 @@ rinkebyProvider = "https://rinkeby.infura.io/"
 mainnetContractAddr =  "0x86c7989ABC839ddcE2e77f71f979a3F42a0F0420"
 mainnetProvider = "https://api.myetherapi.com/eth"
 
-thunderContractAddr = "0xe7b94ff151b0bd883f29708f6b0eef8ff3c17de0"
-thunderProvider = "http://34.212.240.178:8545"
+thunderContractAddr = "0x8341fa5295013c22fa08da7739c038ecff82c9e1"
+thunderProvider = "http://testnet-rpc.thundercore.com:8545"
 
 makeImage ::
     String
@@ -39,8 +39,8 @@ makeImage prefix address provider = do
     B.writeFile filename $ imageToPng (imgToImage wimg)
 
 main = do
-    handle (\(e :: SomeException) -> exitFailure) $ makeImage "thunder" thunderContractAddr thunderProvider
-    handle (\(e :: SomeException) -> exitFailure) $ makeImage "rb" rinkebyContractAddr rinkebyProvider
-    handle (\(e :: SomeException) -> exitFailure) $ makeImage "main" mainnetContractAddr mainnetProvider
+    handle (\(e :: SomeException) -> print e) $ makeImage "thunder" thunderContractAddr thunderProvider
+    handle (\(e :: SomeException) -> print e) $ makeImage "rb" rinkebyContractAddr rinkebyProvider
+    handle (\(e :: SomeException) -> print e) $ makeImage "main" mainnetContractAddr mainnetProvider
     --handle (const exitFailure) $ makeImage "" mainnetContractAddr mainnetProvider
     exitSuccess

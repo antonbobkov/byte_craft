@@ -2,7 +2,7 @@ var contract_address_by_network = {
     "1":  '0x86c7989ABC839ddcE2e77f71f979a3F42a0F0420', // Main
     //"3":  '0x25b1658683da464587039de4664b22cc7501b142', // Ropsten
     "4":  '0x63c7207f1fee3f6c6ba65d2d5a08ef91e7c712b7', // Rinkeby
-    "19": '0xe7b94ff151b0bd883f29708f6b0eef8ff3c17de0', // Network Id 19 HYPE
+    "19": '0x8341fa5295013c22fa08da7739c038ecff82c9e1', // Network Id 19 HYPE
 };
 
 var contract_abi =

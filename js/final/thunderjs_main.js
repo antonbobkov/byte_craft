@@ -23,7 +23,7 @@ function GlobalOnLoad(){
 
     var GET = getGET();
 
-    var img_pth = 'main1024.png';
+    var img_pth = 'thunder1024.png';
 
     if ('image' in GET) {
 	img_pth = GET['image'];
@@ -91,7 +91,7 @@ function OnClickChunk(x,y){
 function SetupMetamask(){
     metamask_loaded = true;
 
-    var forceNetId = '1';
+    var forceNetId = '19';
 
     var GET = getGET();
 
@@ -193,10 +193,10 @@ function GetChunkInfo(){
 	$('<span>').html('Last uploader: ' + addr).appendTo(p);
 	$('<br>').appendTo(p);
 
-	$('<span>').html('Current value (ella): ' + value).appendTo(p);
+	$('<span>').html('Current value (wei): ' + value).appendTo(p);
 	$('<br>').appendTo(p);
 
-	$('<span>').html('Current value (thunder): ' + value_eth).appendTo(p);
+	$('<span>').html('Current value (ether): ' + value_eth).appendTo(p);
 	$('<br>').appendTo(p);
 
 	$('#upload-div').show();
