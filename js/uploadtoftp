@@ -1,1 +1,0 @@
- rsync -r final/ cmspice@ftp.robotbear.org:bytecraft.club/

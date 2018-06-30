@@ -84,7 +84,7 @@ Network.Ethereum.ABI.Prim.Tuple.TH
 ```
 If you need a refresher on the EVM types, this is a good time to checkout the [solidity docs](http://solidity.readthedocs.io/en/v0.4.24/).
 
-Looking back at the definitions of `getUpdatesTimes`, we see the solidity type `uint[1024]` becomes `ListN 1024 (UIntN 256)`. This is a 1024 element list of 256-bit unsigned ints with both sizes fixed at the type level! `ListN` is an instance of `IsList` which has the type family `Item` implemented as
+Looking back at the definitions of `getUpdateTimes`, we see the solidity type `uint[1024]` becomes `ListN 1024 (UIntN 256)`. This is a 1024 element list of 256-bit unsigned ints with both sizes fixed at the type level! `ListN` is an instance of `IsList` which has the type family `Item` implemented as
 ```haskell
 type Item (ListN n a) = a
 ```
@@ -115,7 +115,7 @@ chunks <- concat <$> forM (group 8 queryPairs) (\pts ->
 
 Using `updateTimes` we build a list of `(x,y)` indices of blocks we want to query. The queries are grouped into batches of 8 (using the helper function `group :: Int -> [a] -> [[a]]`) and made in parallel using `forM` from the `monad-parallel` package. The provider starts rejecting requests if too many are made at once and running them all sequentially is very slow. 8 runs fast enough and myetherapi/infura has yet to reject any of our requests.
 
-Inside the queryBlock function, you'll see one more interesting conversion:
+Inside the `queryBlock` function, you'll see one more interesting conversion:
 ```haskell
 queryBlock :: Call -> (Int, Int) -> Web3 ChunkInfo
 queryBlock call (x,y) = do
