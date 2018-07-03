@@ -10,7 +10,6 @@ function GetNetworkName(netId){
 	"3":  'Ropsten test network',
 	"4":  'Rinkeby test network',
 	"42": 'Kovan test network',
-	"19": 'Thunder test network',
     };
 
     if (netId in network_names)
@@ -24,7 +23,6 @@ function GetNetworkWebSite(netId){
 	"1":  'https://etherscan.io/',
 	"3":  'https://ropsten.etherscan.io/',
 	"4":  'https://rinkeby.etherscan.io/',
-	"19": 'http://scan.thundercore.com/'
     };
 
     if (netId in network_web_sites)
