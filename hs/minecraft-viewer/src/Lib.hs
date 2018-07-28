@@ -198,11 +198,14 @@ query prefix address provider_ img = do
             entries = encode . sort $ sortedEntries
             -- log new entries
             logEntries = show $ map (\(Entry x y _ _) -> (x,y)) newEntries
+            -- generate some javascript D:
+            jsextradata = BL.pack $ "lastUpdate = " ++ show updated ++ "\nvalues="
 
         -- deepseq needed so BL.readFile above will finish reading and close the handle
         inEntries' `deepseq` BL.writeFile (prefix ++ "values.json") entries
         putStrLn $ "writing " ++ prefix ++ "values.js with " ++ show (length sortedEntries) ++ " entries"
-        BL.writeFile (prefix ++ "values.js") (BL.append "values=" entries)
+        -- this file just makes the js implementation much easier...
+        BL.writeFile (prefix ++ "values.js") (BL.append jsextradata entries)
         BL.writeFile (prefix ++ "lastUpdate.json") . encode $ updated
 
         -- log what we did
