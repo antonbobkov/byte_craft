@@ -104,6 +104,32 @@ function SetupMetamask(){
 
     MetaMaskOnLoad(SetUpContract, forceNetId);
 
+	// check for updates
+	setInterval(()=>{
+		myContractInstance.lastUpdateOverall.call((error,result) =>{
+			console.log(error);
+			console.log(result);
+			UpdateToCurrentState();
+		});
+	}, 10000);
+
+	// switch to this when web3 1.0 is ready
+	// start listening to events
+	/*
+	var subscription = web3.eth.subscribe('logs', {
+	    address: contractAddress,
+	    topics: [null, '0x0']
+	}, function(error, result){
+	    if (!error)
+	        console.log(result);
+	})
+	.on("data", function(log){
+	    console.log(log);
+		UpdateToCurrentState();
+	})
+	.on("changed", function(log){
+	});*/
+
 }
 
 function SetUpContract(){
@@ -145,12 +171,29 @@ function SetColors(){
     myContractInstance.setColors.sendTransaction(x, y, colorData, {value:value, from:account}, logTransaction);
 }
 
+function UpdateToCurrentState(){
+	myContractInstance.getUpdateTimes.call((error,result) =>{
+		console.log(error);
+		console.log(result);
+		for(var x = 0; x < 32; x++){
+			for(var y = 0; y < 32; y++){
+				if(result[ind(x,y)] > lastUpdate){
+					GetChunkInfo_(x,y);
+				}
+			}
+		}
+	});
+
+
+}
 
 function GetChunkInfo(){
     var x = parseInt($('#x').val());
     var y = parseInt($('#y').val());
+	GetChunkInfo_(x,y);
+}
 
-
+function GetChunkInfo_(x, y){
     if(x == NaN || y == NaN || x < 0 || y < 0 || x >= 32 || y >= 32){
     	errorLog('incorrect coordinates x,y; both should be non-negative numbers less than 32 (' + x + ', ' + y + ')');
     	return;
@@ -193,10 +236,10 @@ function GetChunkInfo(){
 	$('<span>').html('Last uploader: ' + addr).appendTo(p);
 	$('<br>').appendTo(p);
 
-	$('<span>').html('Current value (ella): ' + value).appendTo(p);
+	$('<span>').html('Current value (wei): ' + value).appendTo(p);
 	$('<br>').appendTo(p);
 
-	$('<span>').html('Current value (thunder): ' + value_eth).appendTo(p);
+	$('<span>').html('Current value (ether): ' + value_eth).appendTo(p);
 	$('<br>').appendTo(p);
 
 	$('#upload-div').show();
