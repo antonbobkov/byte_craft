@@ -70,6 +70,10 @@ function GlobalOnLoad(){
 		.click(function () {OnClickChunk(x_,y_);})
 		.appendTo(main);
 	}
+
+	if (metamask_loaded == false){
+		SetupMetamask();
+    }
 }
 
 var metamask_loaded = false;
@@ -175,13 +179,16 @@ function UpdateToCurrentState(){
 	myContractInstance.getUpdateTimes.call((error,result) =>{
 		console.log(error);
 		console.log(result);
+		maxUpdate = lastUpdate
 		for(var x = 0; x < 32; x++){
 			for(var y = 0; y < 32; y++){
 				if(result[ind(x,y)] > lastUpdate){
+					maxUpdate = Math.max(maxUpdate, result[ind(x,y)])
 					GetChunkInfo_(x,y);
 				}
 			}
 		}
+		lastUpdate = maxUpdate
 	});
 
 
