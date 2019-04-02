@@ -2,6 +2,7 @@ var account;
 var networkWebSite;
 var myContractInstance;
 var contractAddress;
+var web3;
 
 function GetNetworkName(netId){
     var network_names = {

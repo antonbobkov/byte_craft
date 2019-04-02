@@ -1,5 +1,5 @@
 # BYTECRAFT
-[Bytecraft](https://bytecraft.club) is a smart contract where users can purchase 32x32 8-bit blocks representing images in 32x32 grid. Bytecraft is currently on Ethereum Main Net. The official app is hosted @ [bytecraft.club](https://bytecraft.club)
+[Bytecraft](http://bytecraft.club) is a smart contract where users can purchase 32x32 8-bit blocks representing images in 32x32 grid. Bytecraft is currently on Ethereum Main Net. The official app is hosted @ [bytecraft.club](https://bytecraft.club)
 
 ## Contract
 The contract has only one external payable function:
